@@ -1,0 +1,55 @@
+.weekly-recap {
+  background:
+    linear-gradient(135deg, rgba(151, 95, 255, 0.24), rgba(74, 214, 255, 0.08)),
+    var(--glass-bg);
+  border: 1px solid var(--color-border-bright);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-soft);
+  display: grid;
+  gap: var(--space-6);
+  grid-template-columns: 1fr 1.1fr;
+  padding: var(--space-6);
+}
+
+.weekly-recap h2 {
+  color: var(--color-white);
+  margin: 0 0 var(--space-3);
+}
+
+.weekly-recap p {
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.weekly-recap__list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.weekly-recap__list div {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+.weekly-recap__list dt {
+  color: var(--color-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.weekly-recap__list dd {
+  color: var(--color-white);
+  font-size: 1.05rem;
+  font-weight: 900;
+  margin: var(--space-2) 0 0;
+}
+
+@media (max-width: 760px) {
+  .weekly-recap {
+    grid-template-columns: 1fr;
+  }
+}

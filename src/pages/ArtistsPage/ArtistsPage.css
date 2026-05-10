@@ -1,0 +1,37 @@
+.artists-page__header {
+  align-items: end;
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: 1fr auto;
+}
+
+.artists-page__search {
+  margin: 0 0 var(--space-6);
+  padding: var(--space-4);
+}
+
+.artists-page__search input {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-white);
+  outline: none;
+  padding: 0.95rem 1.15rem;
+  width: 100%;
+}
+
+.artists-page__search input:focus {
+  border-color: rgba(255, 212, 122, 0.55);
+  box-shadow: 0 0 0 4px rgba(255, 212, 122, 0.1);
+}
+
+.artists-page__grid {
+  margin-top: var(--space-5);
+}
+
+@media (max-width: 760px) {
+  .artists-page__header {
+    align-items: start;
+    grid-template-columns: 1fr;
+  }
+}

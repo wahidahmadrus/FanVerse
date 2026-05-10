@@ -1,0 +1,55 @@
+.stat-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  min-height: 9.5rem;
+  overflow: hidden;
+  padding: var(--space-5);
+  position: relative;
+}
+
+.stat-card::after {
+  border-radius: 50%;
+  content: '';
+  height: 5.5rem;
+  opacity: 0.35;
+  position: absolute;
+  right: -2rem;
+  top: -2rem;
+  width: 5.5rem;
+}
+
+.stat-card--purple::after {
+  background: var(--color-purple);
+}
+
+.stat-card--blue::after {
+  background: var(--color-blue);
+}
+
+.stat-card--pink::after {
+  background: var(--color-pink);
+}
+
+.stat-card--gold::after {
+  background: var(--color-gold);
+}
+
+.stat-card p,
+.stat-card span {
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.stat-card p {
+  font-weight: 800;
+}
+
+.stat-card strong {
+  color: var(--color-white);
+  display: block;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  line-height: 1;
+  margin: var(--space-3) 0 var(--space-2);
+}

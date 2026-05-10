@@ -1,0 +1,111 @@
+.badge-card {
+  align-items: flex-start;
+  background: var(--glass-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  position: relative;
+  transition:
+    transform var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.badge-card:hover {
+  transform: translateY(-3px);
+}
+
+.badge-card--unlocked {
+  border-color: rgba(255, 255, 255, 0.26);
+  box-shadow: var(--shadow-soft);
+}
+
+.badge-card--locked {
+  opacity: 0.68;
+}
+
+.badge-card__icon {
+  align-items: center;
+  border: 1px solid var(--color-border-bright);
+  border-radius: 50%;
+  color: var(--color-white);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 0.72rem;
+  font-weight: 900;
+  height: 3.5rem;
+  justify-content: center;
+  text-align: center;
+  width: 3.5rem;
+}
+
+.badge-card--gold .badge-card__icon {
+  background: radial-gradient(circle at 30% 30%, #fff0bc, #d69a22 72%);
+  box-shadow: 0 0 32px rgba(255, 212, 122, 0.35);
+}
+
+.badge-card--pink .badge-card__icon {
+  background: radial-gradient(circle at 30% 30%, #ffd6fb, #ff6bc5 72%);
+  box-shadow: 0 0 32px rgba(255, 107, 197, 0.35);
+}
+
+.badge-card--blue .badge-card__icon {
+  background: radial-gradient(circle at 30% 30%, #d6f8ff, #4ad6ff 72%);
+  box-shadow: 0 0 32px rgba(74, 214, 255, 0.35);
+}
+
+.badge-card--purple .badge-card__icon {
+  background: radial-gradient(circle at 30% 30%, #efe2ff, #8c5cff 72%);
+  box-shadow: 0 0 32px rgba(151, 95, 255, 0.35);
+}
+
+.badge-card--locked .badge-card__icon {
+  filter: grayscale(0.7);
+  opacity: 0.7;
+}
+
+.badge-card__header {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: space-between;
+}
+
+.badge-card h3,
+.badge-card p {
+  margin: 0;
+}
+
+.badge-card h3 {
+  color: var(--color-white);
+  font-size: 1.05rem;
+}
+
+.badge-card p {
+  color: var(--color-muted);
+  margin-top: var(--space-2);
+}
+
+.badge-card span {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.25rem 0.55rem;
+}
+
+.badge-card--unlocked span {
+  color: var(--color-gold);
+}
+
+.badge-card--compact {
+  padding: var(--space-4);
+}
+
+.badge-card--compact p {
+  display: none;
+}

@@ -1,0 +1,78 @@
+.artist-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  display: grid;
+  overflow: hidden;
+}
+
+.artist-card__image {
+  align-items: center;
+  aspect-ratio: 16 / 10;
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 212, 122, 0.78), transparent 18%),
+    radial-gradient(circle at 70% 70%, rgba(255, 107, 197, 0.6), transparent 20%),
+    linear-gradient(135deg, rgba(151, 95, 255, 0.42), rgba(74, 214, 255, 0.16));
+  display: flex;
+  justify-content: center;
+}
+
+.artist-card__image img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.artist-card__image span {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--color-border-bright);
+  border-radius: 50%;
+  color: var(--color-white);
+  display: inline-flex;
+  font-size: 1.3rem;
+  font-weight: 900;
+  height: 5rem;
+  justify-content: center;
+  width: 5rem;
+}
+
+.artist-card__content {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+}
+
+.artist-card__topline span,
+.artist-card__stats span {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.28rem 0.62rem;
+}
+
+.artist-card h3 {
+  color: var(--color-white);
+  font-size: 1.35rem;
+  margin: 0;
+}
+
+.artist-card p {
+  color: var(--color-muted);
+  display: -webkit-box;
+  line-clamp: 4;
+  margin: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+.artist-card__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}

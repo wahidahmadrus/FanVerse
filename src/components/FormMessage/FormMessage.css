@@ -1,0 +1,24 @@
+.form-message {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-weight: 800;
+  padding: var(--space-3) var(--space-4);
+}
+
+.form-message--info {
+  background: rgba(74, 214, 255, 0.11);
+  border-color: rgba(74, 214, 255, 0.28);
+}
+
+.form-message--success {
+  background: rgba(255, 212, 122, 0.12);
+  border-color: rgba(255, 212, 122, 0.32);
+  color: var(--color-gold);
+}
+
+.form-message--error {
+  background: rgba(255, 107, 197, 0.12);
+  border-color: rgba(255, 107, 197, 0.34);
+  color: #ffc0e7;
+}

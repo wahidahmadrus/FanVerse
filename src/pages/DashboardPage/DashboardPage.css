@@ -1,0 +1,124 @@
+.dashboard-page__hero {
+  align-items: end;
+  display: grid;
+  gap: var(--space-6);
+  grid-template-columns: 1fr auto;
+  margin-bottom: var(--space-6);
+}
+
+.dashboard-page__hero h1 {
+  color: var(--color-white);
+  font-size: clamp(2.3rem, 6vw, 4.8rem);
+  line-height: 1.02;
+  margin: 0;
+  max-width: 840px;
+}
+
+.dashboard-page__hero p:not(.section-kicker) {
+  color: var(--color-muted);
+  margin: var(--space-4) 0 0;
+  max-width: 640px;
+}
+
+.dashboard-page__artist {
+  align-items: center;
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: 7rem 1fr;
+  margin-bottom: var(--space-6);
+  padding: var(--space-5);
+}
+
+.dashboard-page__artist-orbit {
+  aspect-ratio: 1;
+  background: radial-gradient(circle at 34% 28%, #fff3c8, #8b5cff 70%);
+  border-radius: 50%;
+  box-shadow: var(--shadow-glow-strong);
+  position: relative;
+}
+
+.dashboard-page__artist-orbit::after {
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 50%;
+  content: '';
+  height: 42%;
+  left: -24%;
+  position: absolute;
+  top: 30%;
+  transform: rotate(-18deg);
+  width: 148%;
+}
+
+.dashboard-page__artist span {
+  color: var(--color-gold);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.dashboard-page__artist h2 {
+  color: var(--color-white);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  margin: var(--space-1) 0 var(--space-2);
+}
+
+.dashboard-page__artist p {
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.dashboard-page__stats {
+  margin-bottom: var(--space-7);
+}
+
+.dashboard-page__content {
+  align-items: start;
+  display: grid;
+  gap: var(--space-6);
+  grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 0.75fr);
+}
+
+.dashboard-page__section-title {
+  align-items: end;
+  display: flex;
+  gap: var(--space-4);
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.dashboard-page__section-title h2 {
+  color: var(--color-white);
+  margin: 0;
+}
+
+.dashboard-page__memory-list,
+.dashboard-page__badge-list {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@media (max-width: 900px) {
+  .dashboard-page__hero,
+  .dashboard-page__content {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-page__hero {
+    align-items: start;
+  }
+}
+
+@media (max-width: 620px) {
+  .dashboard-page__artist {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-page__artist-orbit {
+    max-width: 7rem;
+  }
+
+  .dashboard-page__section-title {
+    align-items: start;
+    flex-direction: column;
+  }
+}

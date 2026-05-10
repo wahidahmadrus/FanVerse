@@ -1,0 +1,156 @@
+.memory-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: minmax(8rem, 12rem) 1fr;
+  overflow: hidden;
+  padding: var(--space-4);
+}
+
+.memory-card__media {
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.memory-card__media img,
+.memory-card__placeholder {
+  height: 100%;
+  width: 100%;
+}
+
+.memory-card__media img {
+  display: block;
+  object-fit: cover;
+}
+
+.memory-card__placeholder {
+  align-items: center;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 212, 122, 0.7), transparent 16%),
+    radial-gradient(circle at 68% 62%, rgba(255, 107, 197, 0.52), transparent 17%),
+    linear-gradient(135deg, rgba(151, 95, 255, 0.35), rgba(74, 214, 255, 0.12));
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.memory-card__placeholder::before,
+.memory-card__placeholder::after,
+.memory-card__placeholder span {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 50%;
+  content: '';
+  position: absolute;
+}
+
+.memory-card__placeholder::before {
+  height: 72%;
+  width: 72%;
+}
+
+.memory-card__placeholder::after {
+  height: 48%;
+  transform: rotate(-25deg);
+  width: 88%;
+}
+
+.memory-card__placeholder span {
+  background: rgba(255, 255, 255, 0.92);
+  height: 0.5rem;
+  width: 0.5rem;
+}
+
+.memory-card__content {
+  min-width: 0;
+}
+
+.memory-card__topline,
+.memory-card__meta {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.memory-card__topline span,
+.memory-card__meta span,
+.memory-card__meta strong {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.3rem 0.65rem;
+}
+
+.memory-card__topline span:first-child {
+  color: var(--color-blue);
+}
+
+.memory-card h3 {
+  color: var(--color-white);
+  font-size: clamp(1.2rem, 3vw, 1.55rem);
+  margin: var(--space-3) 0 var(--space-1);
+}
+
+.memory-card__artist {
+  color: var(--color-gold);
+  font-weight: 800;
+  margin: 0 0 var(--space-3);
+}
+
+.memory-card__description {
+  color: var(--color-muted);
+  margin: 0 0 var(--space-4);
+}
+
+.memory-card__meta strong {
+  color: var(--color-gold);
+}
+
+.memory-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.memory-card__actions .button {
+  min-height: 2.45rem;
+  padding: 0.55rem 0.85rem;
+}
+
+.memory-card--compact {
+  grid-template-columns: 4.5rem 1fr;
+  padding: var(--space-3);
+}
+
+.memory-card--compact .memory-card__description {
+  display: none;
+}
+
+.memory-card--compact .memory-card__topline span:last-child {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .memory-card {
+    grid-template-columns: 1fr;
+  }
+
+  .memory-card__media {
+    aspect-ratio: 16 / 9;
+  }
+
+  .memory-card--compact {
+    grid-template-columns: 4.25rem 1fr;
+  }
+
+  .memory-card--compact .memory-card__media {
+    aspect-ratio: 1;
+  }
+}

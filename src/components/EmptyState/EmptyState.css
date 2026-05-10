@@ -1,0 +1,30 @@
+.empty-state {
+  background: var(--glass-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-soft);
+  display: grid;
+  gap: var(--space-3);
+  justify-items: center;
+  padding: var(--space-7);
+  text-align: center;
+}
+
+.empty-state__star {
+  background: radial-gradient(circle at 30% 28%, #fff2c3, #8c5cff 72%);
+  border-radius: 50%;
+  box-shadow: var(--shadow-glow-strong);
+  height: 4rem;
+  width: 4rem;
+}
+
+.empty-state h2 {
+  color: var(--color-white);
+  margin: 0;
+}
+
+.empty-state p {
+  color: var(--color-muted);
+  margin: 0 0 var(--space-3);
+  max-width: 36rem;
+}

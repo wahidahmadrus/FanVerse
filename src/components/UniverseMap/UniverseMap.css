@@ -1,0 +1,238 @@
+.universe-map {
+  background:
+    radial-gradient(circle at 25% 20%, rgba(255, 107, 197, 0.22), transparent 22%),
+    radial-gradient(circle at 76% 70%, rgba(74, 214, 255, 0.2), transparent 22%),
+    linear-gradient(135deg, rgba(12, 15, 44, 0.92), rgba(40, 21, 71, 0.82));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-deep);
+  min-height: 31rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.universe-map::before {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.9) 0 1px, transparent 1px),
+    radial-gradient(circle, rgba(255, 212, 122, 0.8) 0 1px, transparent 1px);
+  background-position:
+    0 0,
+    2rem 3rem;
+  background-size:
+    4.2rem 4.2rem,
+    5.5rem 5.5rem;
+  content: '';
+  inset: 0;
+  opacity: 0.28;
+  position: absolute;
+}
+
+.universe-map__orbit {
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 50%;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(-15deg);
+}
+
+.universe-map__orbit--outer {
+  height: 25rem;
+  width: 72%;
+}
+
+.universe-map__orbit--middle {
+  height: 19rem;
+  width: 54%;
+}
+
+.universe-map__orbit--inner {
+  height: 12rem;
+  width: 34%;
+}
+
+.universe-map__core {
+  align-items: center;
+  background: radial-gradient(circle at 35% 30%, #fff0bc, #a856ff 70%);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 50%;
+  box-shadow:
+    0 0 60px rgba(151, 95, 255, 0.58),
+    0 0 120px rgba(255, 107, 197, 0.28);
+  color: var(--color-white);
+  display: flex;
+  flex-direction: column;
+  height: 9rem;
+  justify-content: center;
+  left: 50%;
+  position: absolute;
+  text-align: center;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 9rem;
+  z-index: 2;
+}
+
+.universe-map__core strong {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.universe-map__core span {
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.universe-map__star,
+.universe-map__planet {
+  position: absolute;
+  z-index: 3;
+}
+
+.universe-map__star {
+  background: var(--color-white);
+  border-radius: 50%;
+  box-shadow:
+    0 0 12px rgba(255, 255, 255, 0.9),
+    0 0 22px rgba(74, 214, 255, 0.58);
+  height: 0.5rem;
+  width: 0.5rem;
+}
+
+.universe-map__planet {
+  align-items: center;
+  background: radial-gradient(circle at 30% 30%, #fff5d6, #7e52ff 72%);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 50%;
+  box-shadow: 0 0 30px rgba(151, 95, 255, 0.42);
+  color: var(--color-white);
+  display: inline-flex;
+  font-size: 0.62rem;
+  font-weight: 900;
+  height: 3.8rem;
+  justify-content: center;
+  text-align: center;
+  width: 3.8rem;
+}
+
+.universe-map__star--1 {
+  left: 18%;
+  top: 24%;
+}
+
+.universe-map__star--2 {
+  left: 74%;
+  top: 18%;
+}
+
+.universe-map__star--3 {
+  left: 31%;
+  top: 72%;
+}
+
+.universe-map__star--4 {
+  left: 82%;
+  top: 58%;
+}
+
+.universe-map__star--5 {
+  left: 11%;
+  top: 63%;
+}
+
+.universe-map__star--6 {
+  left: 59%;
+  top: 80%;
+}
+
+.universe-map__star--7 {
+  left: 44%;
+  top: 17%;
+}
+
+.universe-map__star--8 {
+  left: 67%;
+  top: 38%;
+}
+
+.universe-map__star--9 {
+  left: 24%;
+  top: 44%;
+}
+
+.universe-map__star--10 {
+  left: 90%;
+  top: 32%;
+}
+
+.universe-map__star--11 {
+  left: 48%;
+  top: 88%;
+}
+
+.universe-map__star--12 {
+  left: 7%;
+  top: 35%;
+}
+
+.universe-map__planet--1 {
+  left: 16%;
+  top: 12%;
+}
+
+.universe-map__planet--2 {
+  right: 17%;
+  top: 20%;
+}
+
+.universe-map__planet--3 {
+  bottom: 16%;
+  left: 18%;
+}
+
+.universe-map__planet--4 {
+  bottom: 12%;
+  right: 19%;
+}
+
+.universe-map__planet--5 {
+  left: 45%;
+  top: 7%;
+}
+
+.universe-map__planet--6 {
+  bottom: 7%;
+  left: 48%;
+}
+
+@media (max-width: 700px) {
+  .universe-map {
+    min-height: 25rem;
+  }
+
+  .universe-map__orbit--outer {
+    height: 20rem;
+    width: 92%;
+  }
+
+  .universe-map__orbit--middle {
+    height: 15rem;
+    width: 70%;
+  }
+
+  .universe-map__orbit--inner {
+    height: 10rem;
+    width: 48%;
+  }
+
+  .universe-map__core {
+    height: 7.5rem;
+    width: 7.5rem;
+  }
+
+  .universe-map__planet {
+    height: 3.2rem;
+    width: 3.2rem;
+  }
+}
