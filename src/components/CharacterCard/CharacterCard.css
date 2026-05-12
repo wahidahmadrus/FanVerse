@@ -101,6 +101,30 @@
   border: 0;
 }
 
+.character-card .character-card__portrait--loading {
+  aspect-ratio: 3 / 4;
+  background:
+    radial-gradient(circle at 28% 24%, rgba(242, 138, 191, 0.16), transparent 28%),
+    linear-gradient(135deg, rgba(248, 239, 255, 0.88), rgba(255, 248, 239, 0.92));
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.character-card__portrait--loading::before {
+  animation: character-card-loading 1.45s ease-in-out infinite;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.55),
+    transparent
+  );
+  content: '';
+  inset: 0;
+  position: absolute;
+  transform: translateX(-100%);
+}
+
 .character-card__body {
   display: grid;
   gap: var(--space-2);
@@ -166,8 +190,22 @@
   padding: 0.55rem 0.82rem;
 }
 
+.character-card__portrait img {
+  transition: opacity var(--transition-base);
+}
+
+.character-card__portrait--loading img {
+  opacity: 0;
+}
+
 .character-card--compact .character-card__portrait {
   max-width: 20rem;
+}
+
+@keyframes character-card-loading {
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .character-card--compact blockquote {

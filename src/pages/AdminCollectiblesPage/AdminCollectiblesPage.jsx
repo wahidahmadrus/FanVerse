@@ -8,9 +8,13 @@ import {
   deleteCollectibleCard,
   getAdminCollectibleCards,
   getCollectibleImageUrl,
+  getCollectibleThumbnailUrl,
   updateCollectibleCard,
 } from '../../services/collectibleService.js'
-import { STORAGE_BUCKETS, uploadImage, validateImageFile } from '../../services/uploadService.js'
+import {
+  uploadOptimizedCollectibleImages,
+  validateCollectibleImageFile,
+} from '../../services/uploadService.js'
 import './AdminCollectiblesPage.css'
 
 const rarityOptions = ['Common', 'Rare', 'Epic', 'Legendary', 'Monthly Special']
@@ -55,6 +59,7 @@ const emptyForm = {
   unlock_condition_type: 'first_memory',
   unlock_condition_value: '1',
   image_url: '',
+  thumbnail_url: '',
   is_active: true,
 }
 
@@ -67,6 +72,39 @@ const isValidImageReference = (imageValue) => {
     /^https?:\/\//i.test(imageValue) ||
     imageValue.startsWith('/') ||
     imageValue.startsWith('data:image/')
+  )
+}
+
+function AdminCollectiblePreview({ card }) {
+  const [failedImageUrl, setFailedImageUrl] = useState('')
+  const [loadedImageUrl, setLoadedImageUrl] = useState('')
+  const baseImageUrl = getCollectibleThumbnailUrl(card)
+  const cardImageUrl = failedImageUrl === baseImageUrl ? '' : baseImageUrl
+  const imageLoaded = loadedImageUrl === cardImageUrl
+
+  return (
+    <div
+      className={`admin-collectibles-page__item-image ${
+        cardImageUrl && !imageLoaded
+          ? 'admin-collectibles-page__item-image--loading'
+          : ''
+      }`}
+    >
+      {cardImageUrl ? (
+        <img
+          alt={`${card.title} collectible preview`}
+          decoding="async"
+          loading="lazy"
+          onError={() => setFailedImageUrl(cardImageUrl)}
+          onLoad={() => setLoadedImageUrl(cardImageUrl)}
+          src={cardImageUrl}
+        />
+      ) : (
+        <div className="admin-collectibles-page__placeholder">
+          <span>No Image Yet</span>
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -151,6 +189,7 @@ function AdminCollectiblesPage() {
     setFormData((currentData) => ({
       ...currentData,
       [name]: type === 'checkbox' ? checked : value,
+      ...(name === 'image_url' ? { thumbnail_url: '' } : {}),
     }))
 
     if (name === 'image_url' && !imageFile) {
@@ -169,7 +208,7 @@ function AdminCollectiblesPage() {
     }
 
     try {
-      validateImageFile(file)
+      validateCollectibleImageFile(file)
       setImageFile(file)
       setImagePreview(URL.createObjectURL(file))
     } catch (fileError) {
@@ -199,6 +238,7 @@ function AdminCollectiblesPage() {
       unlock_condition_type: card.unlock_condition_type,
       unlock_condition_value: String(card.unlock_condition_value || 1),
       image_url: imageUrl,
+      thumbnail_url: card.thumbnail_url || '',
       is_active: card.is_active,
     })
     setImagePreview(imageUrl)
@@ -229,13 +269,16 @@ function AdminCollectiblesPage() {
 
     try {
       setSaving(true)
-      const imageUrl = imageFile
-        ? await uploadImage({
-            bucket: STORAGE_BUCKETS.collectibleCards,
+      const uploadedImages = imageFile
+        ? await uploadOptimizedCollectibleImages({
             file: imageFile,
             folder: 'cards',
           })
-        : formData.image_url
+        : null
+      const imageUrl = uploadedImages?.imageUrl || formData.image_url
+      const thumbnailUrl =
+        uploadedImages?.thumbnailUrl ||
+        (imageUrl ? formData.thumbnail_url || imageUrl : '')
       const payload = {
         title: formData.title.trim(),
         description: formData.description.trim(),
@@ -246,6 +289,7 @@ function AdminCollectiblesPage() {
         unlock_condition_type: formData.unlock_condition_type,
         unlock_condition_value: Number(formData.unlock_condition_value) || 1,
         image_url: imageUrl || null,
+        thumbnail_url: thumbnailUrl || null,
         is_active: formData.is_active,
       }
 
@@ -500,22 +544,9 @@ function AdminCollectiblesPage() {
             </select>
           </div>
           {filteredCards.map((card) => {
-            const cardImageUrl = getCollectibleImageUrl(card)
-
             return (
               <article className="admin-collectibles-page__item" key={card.id}>
-                <div className="admin-collectibles-page__item-image">
-                  {cardImageUrl ? (
-                    <img
-                      alt={`${card.title} collectible preview`}
-                      src={cardImageUrl}
-                    />
-                  ) : (
-                    <div className="admin-collectibles-page__placeholder">
-                      <span>No Image Yet</span>
-                    </div>
-                  )}
-                </div>
+                <AdminCollectiblePreview card={card} />
                 <div className="admin-collectibles-page__item-body">
                   <h3>{card.title}</h3>
                   <p className="admin-collectibles-page__item-meta">

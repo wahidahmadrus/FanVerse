@@ -32,6 +32,7 @@ function CharacterStoryPage() {
       getCharacterCardImageSources({
         cards: characterCards,
         character,
+        useThumbnail: false,
       }),
     [character, characterCards],
   )
@@ -113,14 +114,16 @@ function CharacterStoryPage() {
         >
           {characterImageUrl ? (
             <img
-              src={characterImageUrl}
               alt={`${character.name} collectible card`}
+              decoding="async"
+              loading="lazy"
               onError={() =>
                 setFailedImageUrls((currentUrls) => [
                   ...currentUrls,
                   characterImageUrl,
                 ])
               }
+              src={characterImageUrl}
             />
           ) : (
             <span>{character.name}</span>

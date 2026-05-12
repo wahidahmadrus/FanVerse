@@ -140,6 +140,7 @@
   align-self: start;
   max-width: 11rem;
   min-width: 0;
+  position: relative;
   width: 100%;
 }
 
@@ -153,6 +154,35 @@
   display: block;
   height: auto;
   object-fit: contain;
+  transition: opacity var(--transition-base);
+}
+
+.admin-collectibles-page__item-image--loading {
+  aspect-ratio: 3 / 4;
+  background:
+    radial-gradient(circle at 28% 24%, rgba(242, 138, 191, 0.16), transparent 28%),
+    linear-gradient(135deg, rgba(248, 239, 255, 0.88), rgba(255, 248, 239, 0.92));
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.admin-collectibles-page__item-image--loading::before {
+  animation: admin-card-preview-loading 1.45s ease-in-out infinite;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.55),
+    transparent
+  );
+  content: '';
+  inset: 0;
+  position: absolute;
+  transform: translateX(-100%);
+}
+
+.admin-collectibles-page__item-image--loading img {
+  opacity: 0;
 }
 
 .admin-collectibles-page__placeholder {
@@ -170,6 +200,12 @@
   min-height: 0;
   padding: var(--space-3);
   text-align: center;
+}
+
+@keyframes admin-card-preview-loading {
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .admin-collectibles-page__item-body {

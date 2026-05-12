@@ -21,9 +21,11 @@ function CharacterCard({
 }) {
   const imageSources = [imageUrl, character.cardImageUrl, character.imageUrl].filter(Boolean)
   const [failedImageUrls, setFailedImageUrls] = useState([])
+  const [loadedImageUrl, setLoadedImageUrl] = useState('')
   const displayImage = imageSources.find(
     (imageSource) => !failedImageUrls.includes(imageSource),
   )
+  const imageLoaded = loadedImageUrl === displayImage
   const cardClassName = [
     'character-card',
     `character-card--${character.id}`,
@@ -41,15 +43,22 @@ function CharacterCard({
           displayImage
             ? 'character-card__portrait--image'
             : 'character-card__portrait--placeholder'
+        } ${
+          displayImage && !imageLoaded ? 'character-card__portrait--loading' : ''
         }`}
       >
         {displayImage ? (
           <img
-            src={displayImage}
             alt={`${character.name} collectible card`}
+            decoding="async"
+            loading="lazy"
             onError={() =>
-              setFailedImageUrls((currentUrls) => [...currentUrls, displayImage])
+              setFailedImageUrls((currentUrls) => [
+                ...new Set([...currentUrls, displayImage]),
+              ])
             }
+            onLoad={() => setLoadedImageUrl(displayImage)}
+            src={displayImage}
           />
         ) : (
           <span>{character.name}</span>

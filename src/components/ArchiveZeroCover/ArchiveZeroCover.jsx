@@ -2,6 +2,7 @@ import { useState } from 'react'
 import './ArchiveZeroCover.css'
 
 const coverImageSrc = '/images/archive-zero-cover.png'
+const coverWebpSrc = '/images/archive-zero-cover.webp'
 
 function ArchiveZeroCover() {
   const [hasCoverImage, setHasCoverImage] = useState(true)
@@ -10,11 +11,15 @@ function ArchiveZeroCover() {
     <section className="archive-zero-cover">
       <div className="archive-zero-cover__media">
         {hasCoverImage ? (
-          <img
-            alt="Archive Zero characters"
-            onError={() => setHasCoverImage(false)}
-            src={coverImageSrc}
-          />
+          <picture>
+            <source srcSet={coverWebpSrc} type="image/webp" />
+            <img
+              alt="Archive Zero characters"
+              decoding="async"
+              onError={() => setHasCoverImage(false)}
+              src={coverImageSrc}
+            />
+          </picture>
         ) : (
           <div className="archive-zero-cover__placeholder" aria-hidden="true">
             <span>En</span>

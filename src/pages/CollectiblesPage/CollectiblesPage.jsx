@@ -54,7 +54,12 @@ function CharacterHistoryModal({
     [character, firstCharacterId, hasPremiumFragment, storyFragments],
   )
   const imageSources = useMemo(
-    () => getCharacterCardImageSources({ cards, character }),
+    () =>
+      getCharacterCardImageSources({
+        cards,
+        character,
+        useThumbnail: false,
+      }),
     [cards, character],
   )
   const characterImageUrl = imageSources.find(
@@ -107,6 +112,8 @@ function CharacterHistoryModal({
             {characterImageUrl ? (
               <img
                 alt={`${character.name} collectible card`}
+                decoding="async"
+                loading="lazy"
                 onError={() =>
                   setFailedImageUrls((currentUrls) => [
                     ...currentUrls,

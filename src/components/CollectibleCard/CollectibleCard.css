@@ -46,6 +46,29 @@
   border-radius: var(--radius-lg);
 }
 
+.collectible-card__image-wrap--loading {
+  aspect-ratio: 3 / 4;
+  background:
+    radial-gradient(circle at 28% 24%, rgba(242, 138, 191, 0.16), transparent 28%),
+    linear-gradient(135deg, rgba(248, 239, 255, 0.88), rgba(255, 248, 239, 0.92));
+  border: 1px dashed var(--color-border);
+  overflow: hidden;
+}
+
+.collectible-card__image-wrap--loading::before {
+  animation: collectible-card-loading 1.45s ease-in-out infinite;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.55),
+    transparent
+  );
+  content: '';
+  inset: 0;
+  position: absolute;
+  transform: translateX(-100%);
+}
+
 .collectible-card__image-wrap--placeholder {
   aspect-ratio: 3 / 4;
   background:
@@ -75,11 +98,22 @@
   display: block;
   height: auto;
   object-fit: contain;
+  transition: opacity var(--transition-base);
   width: 100%;
+}
+
+.collectible-card__image-wrap--loading .collectible-card__image {
+  opacity: 0;
 }
 
 .collectible-card--locked .collectible-card__image {
   filter: grayscale(0.35) saturate(0.75) brightness(0.9);
+}
+
+@keyframes collectible-card-loading {
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .collectible-card__placeholder {

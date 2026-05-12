@@ -137,6 +137,7 @@ create table if not exists public.collectible_cards (
   description text not null,
   rarity text not null check (rarity in ('Common', 'Rare', 'Epic', 'Legendary', 'Monthly Special')),
   image_url text,
+  thumbnail_url text,
   character_id text check (character_id in ('en', 'uan', 'on', 'yal')),
   story_fragment text,
   card_type text not null default 'normal_reward'
@@ -154,6 +155,11 @@ on public.collectible_cards (title);
 alter table public.collectible_cards
 add column if not exists character_id text
 check (character_id in ('en', 'uan', 'on', 'yal'));
+
+-- Existing rows can leave thumbnail_url empty; the app falls back to image_url
+-- until a card image is re-uploaded through the admin optimizer.
+alter table public.collectible_cards
+add column if not exists thumbnail_url text;
 
 alter table public.collectible_cards
 add column if not exists story_fragment text;

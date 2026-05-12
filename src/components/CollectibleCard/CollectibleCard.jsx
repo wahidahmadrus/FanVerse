@@ -1,22 +1,28 @@
 import { useState } from 'react'
 import ShareButton from '../ShareButton/ShareButton.jsx'
 import { getArchiveCharacterById } from '../../data/archiveCharacters.js'
-import { getCollectibleImageUrl } from '../../services/collectibleService.js'
+import {
+  getCollectibleImageUrl,
+  getCollectibleThumbnailUrl,
+} from '../../services/collectibleService.js'
 import './CollectibleCard.css'
 
 function CollectibleCard({ card, username = 'A FanVerse fan' }) {
   const character = getArchiveCharacterById(card.character_id)
-  const imageSources = [
+  const imageSources = [...new Set([
+    getCollectibleThumbnailUrl(card),
     getCollectibleImageUrl(card),
     character?.cardImageUrl,
     character?.imageUrl,
-  ].filter(Boolean)
+  ].filter(Boolean))]
   const [failedImageUrls, setFailedImageUrls] = useState([])
+  const [loadedImageUrl, setLoadedImageUrl] = useState('')
   const cardImage = imageSources.find(
     (imageSource) => !failedImageUrls.includes(imageSource),
   )
   const cardTypeLabel = (card.card_type || 'normal_reward').replaceAll('_', ' ')
   const shouldShowImage = Boolean(cardImage)
+  const imageLoaded = loadedImageUrl === cardImage
 
   return (
     <article
@@ -31,15 +37,24 @@ function CollectibleCard({ card, username = 'A FanVerse fan' }) {
           shouldShowImage
             ? 'collectible-card__image-wrap--image'
             : 'collectible-card__image-wrap--placeholder'
+        } ${
+          shouldShowImage && !imageLoaded
+            ? 'collectible-card__image-wrap--loading'
+            : ''
         }`}
       >
         {shouldShowImage ? (
           <img
             alt={`${card.title} collectible card`}
             className="collectible-card__image"
+            decoding="async"
+            loading="lazy"
             onError={() =>
-              setFailedImageUrls((currentUrls) => [...currentUrls, cardImage])
+              setFailedImageUrls((currentUrls) => [
+                ...new Set([...currentUrls, cardImage]),
+              ])
             }
+            onLoad={() => setLoadedImageUrl(cardImage)}
             src={cardImage}
           />
         ) : (

@@ -52,11 +52,15 @@
   overflow: hidden;
 }
 
+.archive-zero-cover__media picture,
 .archive-zero-cover__media img {
   display: block;
   height: 100%;
-  object-fit: cover;
   width: 100%;
+}
+
+.archive-zero-cover__media img {
+  object-fit: cover;
 }
 
 .archive-zero-cover__placeholder {

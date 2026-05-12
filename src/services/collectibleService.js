@@ -10,6 +10,16 @@ const imageFieldNames = [
   'image',
 ]
 
+const thumbnailFieldNames = [
+  'thumbnail_url',
+  'thumbnailUrl',
+  'thumb_url',
+  'thumbUrl',
+  'card_thumbnail_url',
+  'cardThumbnailUrl',
+  'thumbnail',
+]
+
 const monthlyPremiumCardType = 'monthly_premium'
 
 const isMissingColumnError = (error) =>
@@ -17,18 +27,28 @@ const isMissingColumnError = (error) =>
   error?.message?.toLowerCase().includes('column') ||
   error?.message?.toLowerCase().includes('schema cache')
 
+const hasThumbnailField = (payload) =>
+  Object.prototype.hasOwnProperty.call(payload, 'thumbnail_url')
+
+const withoutThumbnailUrl = (payload) => {
+  const nextPayload = { ...payload }
+  delete nextPayload.thumbnail_url
+  return nextPayload
+}
+
 const isDirectImageUrl = (imageValue) =>
   /^https?:\/\//i.test(imageValue) ||
   imageValue.startsWith('/') ||
   imageValue.startsWith('data:image/') ||
   imageValue.startsWith('blob:')
 
-export const getCollectibleImageUrl = (card) => {
-  const imageValue = imageFieldNames
+const getImageFieldValue = ({ card, fieldNames }) =>
+  fieldNames
     .map((fieldName) => card?.[fieldName])
     .find((value) => typeof value === 'string' && value.trim())
     ?.trim()
 
+const getStorageImageUrl = (imageValue) => {
   if (!imageValue) {
     return ''
   }
@@ -47,16 +67,41 @@ export const getCollectibleImageUrl = (card) => {
   return publicUrl
 }
 
-export const normalizeCollectibleCard = (card) => ({
-  ...card,
-  card_type: card.card_type || 'normal_reward',
-  character_id: card.character_id || '',
-  image_url: getCollectibleImageUrl(card),
-  story_fragment: card.story_fragment || '',
-  unlock_month: card.unlock_month || '',
-  unlock_type: card.unlock_type || '',
-  unlocked: Boolean(card.unlocked_at),
-})
+export const getCollectibleImageUrl = (card) =>
+  getStorageImageUrl(
+    getImageFieldValue({
+      card,
+      fieldNames: imageFieldNames,
+    }),
+  )
+
+export const getCollectibleThumbnailUrl = (card) => {
+  const thumbnailUrl = getStorageImageUrl(
+    getImageFieldValue({
+      card,
+      fieldNames: thumbnailFieldNames,
+    }),
+  )
+
+  return thumbnailUrl || getCollectibleImageUrl(card)
+}
+
+export const normalizeCollectibleCard = (card) => {
+  const imageUrl = getCollectibleImageUrl(card)
+  const thumbnailUrl = getCollectibleThumbnailUrl(card)
+
+  return {
+    ...card,
+    card_type: card.card_type || 'normal_reward',
+    character_id: card.character_id || '',
+    image_url: imageUrl,
+    thumbnail_url: thumbnailUrl,
+    story_fragment: card.story_fragment || '',
+    unlock_month: card.unlock_month || '',
+    unlock_type: card.unlock_type || '',
+    unlocked: Boolean(card.unlocked_at),
+  }
+}
 
 export const getCurrentUnlockMonth = (date = new Date()) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
@@ -264,33 +309,54 @@ export const getAdminCollectibleCards = async () => {
 
 export const createCollectibleCard = async (card) => {
   const client = requireSupabase()
-  const { data, error } = await client
+  let response = await client
     .from('collectible_cards')
     .insert(card)
     .select()
     .single()
 
-  if (error) {
-    throw error
+  if (response.error && hasThumbnailField(card) && isMissingColumnError(response.error)) {
+    response = await client
+      .from('collectible_cards')
+      .insert(withoutThumbnailUrl(card))
+      .select()
+      .single()
   }
 
-  return normalizeCollectibleCard(data)
+  if (response.error) {
+    throw response.error
+  }
+
+  return normalizeCollectibleCard(response.data)
 }
 
 export const updateCollectibleCard = async ({ cardId, updates }) => {
   const client = requireSupabase()
-  const { data, error } = await client
+  let response = await client
     .from('collectible_cards')
     .update(updates)
     .eq('id', cardId)
     .select()
     .single()
 
-  if (error) {
-    throw error
+  if (
+    response.error &&
+    hasThumbnailField(updates) &&
+    isMissingColumnError(response.error)
+  ) {
+    response = await client
+      .from('collectible_cards')
+      .update(withoutThumbnailUrl(updates))
+      .eq('id', cardId)
+      .select()
+      .single()
   }
 
-  return normalizeCollectibleCard(data)
+  if (response.error) {
+    throw response.error
+  }
+
+  return normalizeCollectibleCard(response.data)
 }
 
 export const deleteCollectibleCard = async (cardId) => {

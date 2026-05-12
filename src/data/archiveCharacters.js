@@ -1,7 +1,7 @@
-import enCardImage from '../assets/images/characters/en.png'
-import onCardImage from '../assets/images/characters/on.png'
-import uanCardImage from '../assets/images/characters/uan.png'
-import yalCardImage from '../assets/images/characters/yal.png'
+import enCardImage from '../assets/images/characters/optimized/en.webp'
+import onCardImage from '../assets/images/characters/optimized/on.webp'
+import uanCardImage from '../assets/images/characters/optimized/uan.webp'
+import yalCardImage from '../assets/images/characters/optimized/yal.webp'
 
 const lockedFragmentText =
   'Unlock more character fragments to reveal this part of the story.'
