@@ -1,13 +1,27 @@
 .memory-card {
-  background: var(--glass-bg);
+  background: rgba(255, 253, 249, 0.88);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-soft);
   display: grid;
-  gap: var(--space-5);
-  grid-template-columns: minmax(8rem, 12rem) 1fr;
+  gap: var(--space-4);
+  grid-template-columns: minmax(7rem, 10rem) 1fr;
   overflow: hidden;
   padding: var(--space-4);
+  position: relative;
+}
+
+.memory-card::before {
+  background: var(--color-pink);
+  border-radius: var(--radius-pill);
+  content: '';
+  height: 2.2rem;
+  opacity: 0.16;
+  position: absolute;
+  right: 1rem;
+  top: -0.75rem;
+  transform: rotate(8deg);
+  width: 3.6rem;
 }
 
 .memory-card__media {
@@ -30,9 +44,9 @@
 .memory-card__placeholder {
   align-items: center;
   background:
-    radial-gradient(circle at 35% 30%, rgba(255, 212, 122, 0.7), transparent 16%),
-    radial-gradient(circle at 68% 62%, rgba(255, 107, 197, 0.52), transparent 17%),
-    linear-gradient(135deg, rgba(151, 95, 255, 0.35), rgba(74, 214, 255, 0.12));
+    radial-gradient(circle at 35% 30%, rgba(217, 153, 53, 0.34), transparent 16%),
+    radial-gradient(circle at 68% 62%, rgba(242, 138, 191, 0.34), transparent 17%),
+    linear-gradient(135deg, rgba(141, 101, 216, 0.2), rgba(107, 187, 232, 0.18));
   display: flex;
   justify-content: center;
   position: relative;
@@ -88,12 +102,13 @@
 }
 
 .memory-card__topline span:first-child {
-  color: var(--color-blue);
+  background: #eef7ff;
+  color: #347fae;
 }
 
 .memory-card h3 {
   color: var(--color-white);
-  font-size: clamp(1.2rem, 3vw, 1.55rem);
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
   margin: var(--space-3) 0 var(--space-1);
 }
 
@@ -105,11 +120,23 @@
 
 .memory-card__description {
   color: var(--color-muted);
+  display: -webkit-box;
+  line-clamp: 3;
   margin: 0 0 var(--space-4);
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 .memory-card__meta strong {
   color: var(--color-gold);
+}
+
+.memory-card__proof-note {
+  color: var(--color-muted);
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin: var(--space-3) 0 0;
 }
 
 .memory-card__actions {
@@ -140,6 +167,7 @@
 @media (max-width: 640px) {
   .memory-card {
     grid-template-columns: 1fr;
+    padding: var(--space-3);
   }
 
   .memory-card__media {
@@ -147,10 +175,22 @@
   }
 
   .memory-card--compact {
-    grid-template-columns: 4.25rem 1fr;
+    grid-template-columns: 1fr;
   }
 
   .memory-card--compact .memory-card__media {
-    aspect-ratio: 1;
+    display: none;
+  }
+
+  .memory-card--compact .memory-card__topline span:nth-child(2),
+  .memory-card--compact .memory-card__topline span:nth-child(3),
+  .memory-card--compact .memory-card__meta span:nth-child(2),
+  .memory-card--compact .memory-card__meta span:last-child,
+  .memory-card--compact .memory-card__meta strong:nth-of-type(2) {
+    display: none;
+  }
+
+  .memory-card--compact h3 {
+    margin-top: var(--space-2);
   }
 }

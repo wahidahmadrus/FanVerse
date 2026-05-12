@@ -1,9 +1,16 @@
 import { requireSupabase } from './supabaseClient.js'
+import { calculateMemoryReward } from './rewardService.js'
 
 export const memorySelect = `
   *,
   artist:artists(id, name, category, image_url),
   profile:profiles!memories_user_id_profiles_fkey(display_name, avatar_url)
+`
+
+export const memorySelectWithProfileEmail = `
+  *,
+  artist:artists(id, name, category, image_url),
+  profile:profiles!memories_user_id_profiles_fkey(display_name, email, avatar_url)
 `
 
 export const normalizeMemory = (memory) => ({
@@ -13,9 +20,14 @@ export const normalizeMemory = (memory) => ({
   artistName: memory.artist?.name || 'Unknown artist',
   type: memory.activity_type,
   date: memory.memory_date,
+  baseStars: memory.base_stars || memory.stars || 0,
+  finalStars: memory.final_stars || memory.stars || 0,
+  stars: memory.final_stars || memory.stars || 0,
+  hasProof: memory.has_proof || Boolean(memory.proof_image_url),
   proofImageUrl: memory.proof_image_url,
   imageUrl: memory.proof_image_url,
   authorName: memory.profile?.display_name || 'Fan explorer',
+  authorEmail: memory.profile?.email || '',
 })
 
 export const getPublicMemories = async ({ artistId, limit } = {}) => {
@@ -86,6 +98,11 @@ export const getUserMemoryById = async ({ memoryId, userId }) => {
 
 export const createMemory = async ({ memory, userId }) => {
   const client = requireSupabase()
+  const hasProof = Boolean(memory.proofImageUrl)
+  const reward = calculateMemoryReward({
+    activityType: memory.activityType,
+    hasProof,
+  })
   const { data, error } = await client
     .from('memories')
     .insert({
@@ -95,8 +112,11 @@ export const createMemory = async ({ memory, userId }) => {
       activity_type: memory.activityType,
       mood: memory.mood,
       description: memory.description,
-      stars: memory.stars,
+      stars: reward.finalStars,
+      base_stars: reward.baseStars,
+      final_stars: reward.finalStars,
       proof_image_url: memory.proofImageUrl || null,
+      has_proof: hasProof,
       visibility: memory.visibility,
       memory_date: memory.memoryDate,
     })
@@ -112,6 +132,11 @@ export const createMemory = async ({ memory, userId }) => {
 
 export const updateMemory = async ({ memoryId, memory, userId }) => {
   const client = requireSupabase()
+  const hasProof = Boolean(memory.proofImageUrl)
+  const reward = calculateMemoryReward({
+    activityType: memory.activityType,
+    hasProof,
+  })
   const { data, error } = await client
     .from('memories')
     .update({
@@ -120,8 +145,11 @@ export const updateMemory = async ({ memoryId, memory, userId }) => {
       activity_type: memory.activityType,
       mood: memory.mood,
       description: memory.description,
-      stars: memory.stars,
+      stars: reward.finalStars,
+      base_stars: reward.baseStars,
+      final_stars: reward.finalStars,
       proof_image_url: memory.proofImageUrl || null,
+      has_proof: hasProof,
       visibility: memory.visibility,
       memory_date: memory.memoryDate,
     })

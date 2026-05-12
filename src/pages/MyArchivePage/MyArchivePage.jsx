@@ -10,12 +10,21 @@ import { deleteMemory, getUserMemories } from '../../services/memoryService.js'
 import './MyArchivePage.css'
 
 const visibilityFilters = ['All', 'Public', 'Private']
+const proofFilters = ['All', 'Proof Added', 'Memory Only']
+const sortOptions = [
+  { label: 'Newest', value: 'newest' },
+  { label: 'Oldest', value: 'oldest' },
+  { label: 'Highest Stars', value: 'stars' },
+]
 
 function MyArchivePage() {
   const { user } = useAuth()
   const [memories, setMemories] = useState([])
+  const [search, setSearch] = useState('')
   const [selectedType, setSelectedType] = useState('All')
   const [selectedVisibility, setSelectedVisibility] = useState('All')
+  const [selectedProof, setSelectedProof] = useState('All')
+  const [selectedSort, setSelectedSort] = useState('newest')
   const [deletingId, setDeletingId] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -37,16 +46,44 @@ function MyArchivePage() {
   }, [user])
 
   const filteredMemories = useMemo(() => {
+    const searchTerm = search.trim().toLowerCase()
+
     return memories.filter((memory) => {
       const typeMatches =
         selectedType === 'All' || memory.activity_type === selectedType
       const visibilityMatches =
         selectedVisibility === 'All' ||
         memory.visibility === selectedVisibility.toLowerCase()
+      const hasProof = memory.has_proof || Boolean(memory.proof_image_url)
+      const proofMatches =
+        selectedProof === 'All' ||
+        (selectedProof === 'Proof Added' ? hasProof : !hasProof)
+      const searchMatches =
+        !searchTerm ||
+        [
+          memory.title,
+          memory.artistName,
+          memory.artist?.name,
+          memory.activity_type,
+          memory.mood,
+          memory.description,
+        ]
+          .join(' ')
+          .toLowerCase()
+          .includes(searchTerm)
 
-      return typeMatches && visibilityMatches
+      return typeMatches && visibilityMatches && proofMatches && searchMatches
+    }).sort((a, b) => {
+      if (selectedSort === 'stars') {
+        return Number(b.final_stars || b.stars || 0) - Number(a.final_stars || a.stars || 0)
+      }
+
+      const dateA = new Date(`${a.memory_date || a.date}T00:00:00`).getTime()
+      const dateB = new Date(`${b.memory_date || b.date}T00:00:00`).getTime()
+
+      return selectedSort === 'oldest' ? dateA - dateB : dateB - dateA
     })
-  }, [memories, selectedType, selectedVisibility])
+  }, [memories, search, selectedProof, selectedSort, selectedType, selectedVisibility])
 
   const handleDeleteMemory = async (memory) => {
     const shouldDelete = window.confirm(
@@ -95,6 +132,24 @@ function MyArchivePage() {
       <FormMessage type="success">{message}</FormMessage>
 
       <section className="my-archive-page__filters" aria-label="Filter memories">
+        <div className="my-archive-page__search-row">
+          <input
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search title, artist, mood, activity..."
+            type="search"
+            value={search}
+          />
+          <select
+            onChange={(event) => setSelectedSort(event.target.value)}
+            value={selectedSort}
+          >
+            {sortOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
         <div>
           {activityTypes.map((type) => (
             <button
@@ -127,10 +182,27 @@ function MyArchivePage() {
             </button>
           ))}
         </div>
+        <div>
+          {proofFilters.map((proof) => (
+            <button
+              className={
+                selectedProof === proof
+                  ? 'my-archive-page__filter my-archive-page__filter--active'
+                  : 'my-archive-page__filter'
+              }
+              key={proof}
+              onClick={() => setSelectedProof(proof)}
+              type="button"
+            >
+              {proof}
+            </button>
+          ))}
+        </div>
       </section>
 
       {memories.length > 0 ? (
         <Timeline
+          compact
           memories={filteredMemories}
           renderActions={(memory) => (
             <>

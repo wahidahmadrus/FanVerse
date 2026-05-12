@@ -1,12 +1,12 @@
 .cta-section {
   background:
-    radial-gradient(circle at 12% 20%, rgba(255, 212, 122, 0.24), transparent 20%),
-    radial-gradient(circle at 86% 82%, rgba(74, 214, 255, 0.18), transparent 24%),
-    var(--glass-bg);
+    radial-gradient(circle at 12% 20%, rgba(217, 153, 53, 0.18), transparent 20%),
+    radial-gradient(circle at 86% 82%, rgba(107, 187, 232, 0.16), transparent 24%),
+    rgba(255, 253, 249, 0.86);
   border: 1px solid var(--color-border-bright);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-soft);
-  padding: var(--space-8);
+  padding: var(--space-7);
   text-align: center;
 }
 
@@ -30,6 +30,6 @@
 
 @media (max-width: 620px) {
   .cta-section {
-    padding: var(--space-6);
+    padding: var(--space-5);
   }
 }

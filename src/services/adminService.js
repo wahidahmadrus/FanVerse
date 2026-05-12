@@ -1,5 +1,9 @@
 import { normalizeArtist } from './artistService.js'
-import { memorySelect, normalizeMemory } from './memoryService.js'
+import {
+  memorySelect,
+  memorySelectWithProfileEmail,
+  normalizeMemory,
+} from './memoryService.js'
 import { requireSupabase } from './supabaseClient.js'
 
 const getRows = async (query) => {
@@ -10,6 +14,25 @@ const getRows = async (query) => {
   }
 
   return data || []
+}
+
+const isMissingColumnError = (error) =>
+  error?.code === '42703' ||
+  error?.message?.toLowerCase().includes('column') ||
+  error?.message?.toLowerCase().includes('schema cache')
+
+const getRowsWithFallback = async ({ fallbackQuery, query }) => {
+  const { data, error } = await query
+
+  if (!error) {
+    return data || []
+  }
+
+  if (!isMissingColumnError(error)) {
+    throw error
+  }
+
+  return getRows(fallbackQuery)
 }
 
 export const getAdminDashboard = async () => {
@@ -28,12 +51,16 @@ export const getAdminDashboard = async () => {
           .select('*, artist_fans(count), memories(count)')
           .order('created_at', { ascending: false }),
       ),
-      getRows(
-        client
+      getRowsWithFallback({
+        query: client
+          .from('memories')
+          .select(memorySelectWithProfileEmail)
+          .order('created_at', { ascending: false }),
+        fallbackQuery: client
           .from('memories')
           .select(memorySelect)
           .order('created_at', { ascending: false }),
-      ),
+      }),
       getRows(
         client
           .from('badges')
@@ -58,7 +85,29 @@ export const updateProfileRole = async ({ profileId, role }) => {
   const client = requireSupabase()
   const { data, error } = await client
     .from('profiles')
-    .update({ role })
+    .update({ role, is_admin: role === 'admin' })
+    .eq('id', profileId)
+    .select()
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  return data
+}
+
+export const updateProfileAdmin = async ({ profileId, updates }) => {
+  const client = requireSupabase()
+  const nextUpdates = { ...updates }
+
+  if ('role' in nextUpdates) {
+    nextUpdates.is_admin = nextUpdates.role === 'admin'
+  }
+
+  const { data, error } = await client
+    .from('profiles')
+    .update(nextUpdates)
     .eq('id', profileId)
     .select()
     .single()
@@ -97,18 +146,27 @@ export const deleteArtistAdmin = async (artistId) => {
 
 export const updateMemoryAdmin = async ({ memoryId, updates }) => {
   const client = requireSupabase()
-  const { data, error } = await client
+  let response = await client
     .from('memories')
     .update(updates)
     .eq('id', memoryId)
-    .select(memorySelect)
+    .select(memorySelectWithProfileEmail)
     .single()
 
-  if (error) {
-    throw error
+  if (response.error && isMissingColumnError(response.error)) {
+    response = await client
+      .from('memories')
+      .update(updates)
+      .eq('id', memoryId)
+      .select(memorySelect)
+      .single()
   }
 
-  return normalizeMemory(data)
+  if (response.error) {
+    throw response.error
+  }
+
+  return normalizeMemory(response.data)
 }
 
 export const deleteMemoryAdmin = async (memoryId) => {
@@ -127,4 +185,35 @@ export const deleteBadgeAdmin = async (badgeId) => {
   if (error) {
     throw error
   }
+}
+
+export const createBadgeAdmin = async (badge) => {
+  const client = requireSupabase()
+  const { data, error } = await client
+    .from('badges')
+    .insert(badge)
+    .select()
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  return data
+}
+
+export const updateBadgeAdmin = async ({ badgeId, updates }) => {
+  const client = requireSupabase()
+  const { data, error } = await client
+    .from('badges')
+    .update(updates)
+    .eq('id', badgeId)
+    .select()
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  return data
 }

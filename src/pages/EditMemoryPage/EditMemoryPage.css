@@ -2,18 +2,22 @@
   display: grid;
   gap: var(--space-4);
   max-width: 52rem;
-  padding: var(--space-6);
+  min-width: 0;
+  padding: var(--space-5);
+  width: 100%;
 }
 
 .edit-memory-page__form-grid {
   display: grid;
   gap: var(--space-4);
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-width: 0;
 }
 
 .edit-memory-page label {
   display: grid;
   gap: var(--space-2);
+  min-width: 0;
 }
 
 .edit-memory-page label span,
@@ -26,17 +30,28 @@
 .edit-memory-page input,
 .edit-memory-page select,
 .edit-memory-page textarea {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.72);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  color: var(--color-white);
+  color: var(--color-text);
+  max-width: 100%;
+  min-width: 0;
   outline: none;
   padding: 0.95rem 1rem;
+  width: 100%;
+}
+
+.edit-memory-page input[type='file'] {
+  padding: 0.75rem;
+}
+
+.edit-memory-page input[type='file']::file-selector-button {
+  max-width: 100%;
 }
 
 .edit-memory-page select option {
-  background: var(--color-bg-soft);
-  color: var(--color-white);
+  background: var(--color-paper);
+  color: var(--color-text);
 }
 
 .edit-memory-page textarea {
@@ -46,8 +61,8 @@
 .edit-memory-page input:focus,
 .edit-memory-page select:focus,
 .edit-memory-page textarea:focus {
-  border-color: rgba(255, 212, 122, 0.55);
-  box-shadow: 0 0 0 4px rgba(255, 212, 122, 0.1);
+  border-color: rgba(141, 101, 216, 0.5);
+  box-shadow: 0 0 0 4px rgba(141, 101, 216, 0.12);
 }
 
 .edit-memory-page fieldset {
@@ -56,6 +71,7 @@
   display: grid;
   gap: var(--space-3);
   margin: 0;
+  min-width: 0;
   padding: var(--space-4);
 }
 
@@ -66,16 +82,90 @@
 .edit-memory-page__radio {
   align-items: center;
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-3);
+  max-width: 100%;
 }
 
 .edit-memory-page__radio input {
   accent-color: var(--color-purple);
+  flex: 0 0 auto;
   width: auto;
 }
 
+.edit-memory-page__radio span {
+  min-width: 0;
+}
+
+.edit-memory-page__reward {
+  background: linear-gradient(135deg, rgba(248, 215, 239, 0.72), rgba(220, 239, 255, 0.64));
+  border-radius: var(--radius-md);
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-4);
+}
+
+.edit-memory-page__reward strong {
+  color: var(--color-white);
+}
+
+.edit-memory-page__reward span,
+.edit-memory-page__reward p,
+.edit-memory-page__upload small {
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.edit-memory-page__reward p {
+  color: var(--color-purple);
+  font-weight: 900;
+}
+
+.edit-memory-page__proof-preview {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  display: block;
+  max-height: 14rem;
+  max-width: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
 @media (max-width: 620px) {
+  .edit-memory-page__form {
+    padding: var(--space-4);
+  }
+
   .edit-memory-page__form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .edit-memory-page input,
+  .edit-memory-page select,
+  .edit-memory-page textarea {
+    font-size: 0.95rem;
+    padding: 0.74rem 0.85rem;
+  }
+
+  .edit-memory-page input[type='file'] {
+    font-size: 0.82rem;
+    padding: 0.6rem;
+  }
+
+  .edit-memory-page fieldset,
+  .edit-memory-page__reward {
+    padding: var(--space-3);
+  }
+
+  .edit-memory-page__radio {
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+}
+
+@media (max-width: 430px) {
+  .edit-memory-page__form {
+    padding: var(--space-3);
   }
 }

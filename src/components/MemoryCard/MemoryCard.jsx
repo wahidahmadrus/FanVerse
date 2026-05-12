@@ -17,6 +17,9 @@ function MemoryCard({ memory, compact = false, actions = null }) {
   const imageUrl = memory.proof_image_url || memory.proofImageUrl || memory.imageUrl
   const visibility = memory.visibility || 'public'
   const authorName = memory.authorName || memory.profile?.display_name
+  const hasProof = memory.has_proof || memory.hasProof || Boolean(imageUrl)
+  const baseStars = memory.base_stars || memory.baseStars || memory.stars
+  const finalStars = memory.final_stars || memory.finalStars || memory.stars
 
   return (
     <article className={`memory-card ${compact ? 'memory-card--compact' : ''}`}>
@@ -34,6 +37,7 @@ function MemoryCard({ memory, compact = false, actions = null }) {
         <div className="memory-card__topline">
           <span>{activityType}</span>
           <span>{visibility === 'private' ? 'Private Memory' : 'Public Memory'}</span>
+          <span>{hasProof ? 'Proof Added' : 'Memory Only'}</span>
         </div>
         <h3>{memory.title}</h3>
         <p className="memory-card__artist">{artistName}</p>
@@ -41,9 +45,15 @@ function MemoryCard({ memory, compact = false, actions = null }) {
         <div className="memory-card__meta">
           {memoryDate && <span>{formatDate(memoryDate)}</span>}
           <span>{memory.mood}</span>
-          <strong>{memory.stars} stars</strong>
+          <strong>{finalStars} stars</strong>
+          {hasProof && <strong>2x Stars Applied</strong>}
           {authorName && <span>By {authorName}</span>}
         </div>
+        {hasProof && (
+          <p className="memory-card__proof-note">
+            Base reward {baseStars} stars with proof bonus applied.
+          </p>
+        )}
         {actions && <div className="memory-card__actions">{actions}</div>}
       </div>
     </article>

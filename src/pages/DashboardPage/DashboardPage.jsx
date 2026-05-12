@@ -1,25 +1,21 @@
 import { useEffect, useMemo, useState } from 'react'
-import ArtistCard from '../../components/ArtistCard/ArtistCard.jsx'
-import BadgeCard from '../../components/BadgeCard/BadgeCard.jsx'
 import Button from '../../components/Button/Button.jsx'
 import EmptyState from '../../components/EmptyState/EmptyState.jsx'
 import FormMessage from '../../components/FormMessage/FormMessage.jsx'
 import LoadingState from '../../components/LoadingState/LoadingState.jsx'
 import MemoryCard from '../../components/MemoryCard/MemoryCard.jsx'
 import StatCard from '../../components/StatCard/StatCard.jsx'
-import WeeklyRecap from '../../components/WeeklyRecap/WeeklyRecap.jsx'
 import { useAuth } from '../../context/useAuth.js'
-import { getArtists, getSupportedArtists } from '../../services/artistService.js'
-import { syncUserBadges } from '../../services/badgeService.js'
+import { checkAchievements } from '../../services/achievementService.js'
+import { getUserCollectibleCards } from '../../services/collectibleService.js'
 import { getUserMemories } from '../../services/memoryService.js'
 import './DashboardPage.css'
 
 function DashboardPage() {
   const { profile, user } = useAuth()
   const [memories, setMemories] = useState([])
+  const [cards, setCards] = useState([])
   const [badges, setBadges] = useState([])
-  const [supportedArtists, setSupportedArtists] = useState([])
-  const [suggestedArtists, setSuggestedArtists] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -27,29 +23,15 @@ function DashboardPage() {
     const loadDashboard = async () => {
       try {
         setLoading(true)
-        const [memoryRows, supportedArtistRows, artistRows] = await Promise.all([
+        const [memoryRows, achievements] = await Promise.all([
           getUserMemories({ userId: user.id, limit: 8 }),
-          getSupportedArtists(user.id),
-          getArtists({ limit: 6 }),
+          checkAchievements({ userId: user.id }),
         ])
+        const cardRows = await getUserCollectibleCards(user.id)
 
         setMemories(memoryRows)
-        setSupportedArtists(supportedArtistRows)
-        setSuggestedArtists(
-          artistRows.filter(
-            (artist) =>
-              !supportedArtistRows.some(
-                (supportedArtist) => supportedArtist.id === artist.id,
-              ),
-          ),
-        )
-        setBadges(
-          await syncUserBadges({
-            userId: user.id,
-            memories: memoryRows,
-            supportedArtists: supportedArtistRows,
-          }),
-        )
+        setCards(cardRows)
+        setBadges(achievements.badges)
       } catch (loadError) {
         setError(loadError.message)
       } finally {
@@ -61,10 +43,17 @@ function DashboardPage() {
   }, [user])
 
   const totalStars = useMemo(
-    () => memories.reduce((total, memory) => total + Number(memory.stars || 0), 0),
+    () =>
+      memories.reduce(
+        (total, memory) => total + Number(memory.final_stars || memory.stars || 0),
+        0,
+      ),
     [memories],
   )
+  const proofCount = memories.filter((memory) => memory.has_proof).length
+  const unlockedCards = cards.filter((card) => card.unlocked)
   const unlockedBadges = badges.filter((badge) => badge.unlocked)
+  const latestReward = unlockedCards[0] || unlockedBadges[0]
   const displayName =
     profile?.display_name || user?.user_metadata?.display_name || 'Fan explorer'
 
@@ -79,55 +68,29 @@ function DashboardPage() {
           <p className="section-kicker">Dashboard</p>
           <h1>Welcome back, {displayName}</h1>
           <p>
-            Your personal archive, supported artists, stars, and badges are all
-            gathered here with room to grow.
+            Fans don&apos;t end, nor do their stories. Keep the next memory
+            close and archive it when it feels right.
           </p>
         </div>
         <div className="actions">
           <Button to="/add-memory">Add Memory</Button>
-          <Button to="/artists" variant="secondary">
-            Explore Artists
-          </Button>
-          <Button to="/create-artist" variant="ghost">
-            Create Artist
-          </Button>
         </div>
       </section>
 
       <FormMessage type="error">{error}</FormMessage>
 
       <section className="grid grid--4 dashboard-page__stats" aria-label="Archive stats">
-        <StatCard
-          detail="personal timeline"
-          label="Total Memories Archived"
-          tone="purple"
-          value={memories.length}
-        />
-        <StatCard
-          detail="collected gently"
-          label="Total Stars Collected"
-          tone="gold"
-          value={totalStars}
-        />
-        <StatCard
-          detail="fan communities"
-          label="Artists Supported"
-          tone="blue"
-          value={supportedArtists.length}
-        />
-        <StatCard
-          detail="milestones"
-          label="Badges Unlocked"
-          tone="pink"
-          value={unlockedBadges.length}
-        />
+        <StatCard label="Memories" tone="purple" value={memories.length} />
+        <StatCard label="Stars" tone="gold" value={totalStars} />
+        <StatCard label="Proof Added" tone="blue" value={proofCount} />
+        <StatCard label="Cards" tone="pink" value={unlockedCards.length} />
       </section>
 
       <section className="dashboard-page__content">
         <div>
           <div className="dashboard-page__section-title">
             <div>
-              <p className="section-kicker">Recent Personal Memories</p>
+              <p className="section-kicker">Recent Memories</p>
               <h2>Your latest archive entries</h2>
             </div>
             <Button to="/my-archive" variant="ghost">
@@ -144,55 +107,44 @@ function DashboardPage() {
               <EmptyState
                 actionLabel="Add Memory"
                 actionTo="/add-memory"
-                description="Archive your first moment when you are ready."
-                title="Your personal archive is waiting"
+                description="Your universe is waiting for its first star."
+                title="Your archive is ready"
               />
             )}
           </div>
         </div>
 
-        <aside>
-          <div className="dashboard-page__section-title">
-            <div>
-              <p className="section-kicker">Badges</p>
-              <h2>Unlocked</h2>
-            </div>
-            <Button to="/universe" variant="ghost">
+        <aside className="dashboard-page__side">
+          <div className="dashboard-page__reward glass-panel">
+            <p className="section-kicker">Latest Reward</p>
+            {latestReward ? (
+              <>
+                <h2>{latestReward.title}</h2>
+                <p>
+                  {'rarity' in latestReward
+                    ? `${latestReward.rarity} collectible`
+                    : 'Badge unlocked'}
+                </p>
+              </>
+            ) : (
+              <>
+                <h2>Your first reward is waiting</h2>
+                <p>Archive a memory to begin unlocking badges and cards.</p>
+              </>
+            )}
+          </div>
+          <div className="dashboard-page__quick-links">
+            <Button to="/universe" variant="secondary">
               Universe
             </Button>
-          </div>
-
-          <div className="dashboard-page__badge-list">
-            {badges.slice(0, 3).map((badge) => (
-              <BadgeCard badge={badge} compact key={badge.id} />
-            ))}
+            <Button to="/collectibles" variant="secondary">
+              Collectibles
+            </Button>
+            <Button to="/my-archive" variant="ghost">
+              My Archive
+            </Button>
           </div>
         </aside>
-      </section>
-
-      <section className="page-section dashboard-page__suggestions">
-        <div className="section-heading">
-          <p className="section-kicker">Suggested Artists</p>
-          <h2>Find another archive to support</h2>
-        </div>
-        {suggestedArtists.length > 0 ? (
-          <div className="grid grid--3">
-            {suggestedArtists.slice(0, 3).map((artist) => (
-              <ArtistCard artist={artist} key={artist.id} />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            actionLabel="Explore Artists"
-            actionTo="/artists"
-            description="New artist archives will appear here as the community grows."
-            title="No suggestions yet"
-          />
-        )}
-      </section>
-
-      <section className="page-section">
-        <WeeklyRecap memories={memories} />
       </section>
     </div>
   )

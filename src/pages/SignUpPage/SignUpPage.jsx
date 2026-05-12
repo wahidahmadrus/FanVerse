@@ -45,7 +45,7 @@ function SignUpPage() {
       })
 
       if (data.session) {
-        navigate('/dashboard', { replace: true })
+        navigate('/onboarding/first-card', { replace: true })
       } else {
         navigate('/signin', {
           replace: true,

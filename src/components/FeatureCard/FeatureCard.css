@@ -1,10 +1,10 @@
 .feature-card {
-  background: var(--glass-bg);
+  background: rgba(255, 253, 249, 0.84);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-soft);
-  min-height: 14rem;
-  padding: var(--space-5);
+  min-height: 11rem;
+  padding: var(--space-4);
   position: relative;
 }
 
@@ -32,7 +32,7 @@
 
 .feature-card__icon {
   align-items: center;
-  background: rgba(255, 255, 255, 0.08);
+  background: #f8e8f4;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   color: var(--color-gold);
@@ -47,7 +47,7 @@
 
 .feature-card h3 {
   color: var(--color-white);
-  font-size: 1.2rem;
+  font-size: 1.08rem;
   margin: 0 0 var(--space-3);
 }
 

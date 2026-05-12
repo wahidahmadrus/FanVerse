@@ -46,6 +46,38 @@ export const badgeCatalog = [
     isUnlocked: (memories) => hasType(memories, 'Streaming'),
   },
   {
+    id: 'proof-added',
+    title: 'Proof Added',
+    description: 'You added proof to make a memory more authentic.',
+    icon: 'Proof',
+    glow: 'blue',
+    conditionType: 'proof_added',
+    isUnlocked: (memories) =>
+      memories.some((memory) => memory.has_proof || memory.proof_image_url),
+  },
+  {
+    id: 'hundred-stars',
+    title: '100 Stars',
+    description: 'Your archive collected its first 100 stars.',
+    icon: '100',
+    glow: 'gold',
+    conditionType: 'hundred_stars',
+    isUnlocked: (memories) =>
+      memories.reduce(
+        (total, memory) => total + Number(memory.final_stars || memory.stars || 0),
+        0,
+      ) >= 100,
+  },
+  {
+    id: 'fan-art-memory',
+    title: 'Fan Art Memory',
+    description: 'You archived a creative fan art moment.',
+    icon: 'Art',
+    glow: 'pink',
+    conditionType: 'fan_art_memory',
+    isUnlocked: (memories) => hasType(memories, 'Fan Art'),
+  },
+  {
     id: 'fan-project-contributor',
     title: 'Fan Project Contributor',
     description: 'You joined or supported a fan project.',

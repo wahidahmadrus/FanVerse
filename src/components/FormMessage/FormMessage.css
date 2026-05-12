@@ -7,18 +7,18 @@
 }
 
 .form-message--info {
-  background: rgba(74, 214, 255, 0.11);
-  border-color: rgba(74, 214, 255, 0.28);
+  background: rgba(107, 187, 232, 0.12);
+  border-color: rgba(107, 187, 232, 0.3);
 }
 
 .form-message--success {
-  background: rgba(255, 212, 122, 0.12);
-  border-color: rgba(255, 212, 122, 0.32);
-  color: var(--color-gold);
+  background: rgba(217, 153, 53, 0.12);
+  border-color: rgba(217, 153, 53, 0.32);
+  color: #765018;
 }
 
 .form-message--error {
-  background: rgba(255, 107, 197, 0.12);
-  border-color: rgba(255, 107, 197, 0.34);
-  color: #ffc0e7;
+  background: rgba(242, 138, 191, 0.14);
+  border-color: rgba(191, 69, 128, 0.28);
+  color: #7e2551;
 }

@@ -1,0 +1,54 @@
+.achievement-toast {
+  background:
+    radial-gradient(circle at 92% 12%, rgba(217, 153, 53, 0.22), transparent 28%),
+    linear-gradient(135deg, rgba(255, 253, 249, 0.98), rgba(246, 237, 255, 0.96));
+  border: 1px solid rgba(141, 101, 216, 0.24);
+  border-radius: var(--radius-xl);
+  bottom: var(--space-5);
+  box-shadow: 0 18px 48px rgba(84, 58, 118, 0.18);
+  max-width: 28rem;
+  padding: var(--space-5);
+  position: fixed;
+  right: var(--space-5);
+  z-index: 50;
+}
+
+.achievement-toast::before {
+  background: var(--gradient-aurora);
+  border-radius: var(--radius-pill);
+  content: '';
+  display: block;
+  height: 0.28rem;
+  margin-bottom: var(--space-3);
+  width: 4.5rem;
+}
+
+.achievement-toast h2 {
+  color: var(--color-text);
+  font-size: 1.2rem;
+  margin: 0 0 var(--space-2);
+}
+
+.achievement-toast p:not(.section-kicker) {
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.achievement-toast .section-kicker {
+  color: var(--color-purple);
+}
+
+.achievement-toast__actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+@media (max-width: 620px) {
+  .achievement-toast {
+    bottom: 5.6rem;
+    left: var(--space-3);
+    right: var(--space-3);
+    padding: var(--space-4);
+  }
+}

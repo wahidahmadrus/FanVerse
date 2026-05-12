@@ -1,5 +1,5 @@
 import { requireSupabase } from './supabaseClient.js'
-import { upsertProfile } from './profileService.js'
+import { ensureProfile, upsertProfile } from './profileService.js'
 
 export const signUp = async ({ name, email, password }) => {
   const client = requireSupabase()
@@ -39,6 +39,10 @@ export const signIn = async ({ email, password }) => {
 
   if (error) {
     throw error
+  }
+
+  if (data.user) {
+    await ensureProfile(data.user)
   }
 
   return data

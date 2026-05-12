@@ -1,7 +1,7 @@
 import MemoryCard from '../MemoryCard/MemoryCard.jsx'
 import './Timeline.css'
 
-function Timeline({ memories, renderActions }) {
+function Timeline({ compact = false, memories, renderActions }) {
   if (memories.length === 0) {
     return (
       <div className="timeline-empty">
@@ -18,6 +18,7 @@ function Timeline({ memories, renderActions }) {
           <div className="timeline__marker" aria-hidden="true"></div>
           <MemoryCard
             actions={renderActions ? renderActions(memory) : null}
+            compact={compact}
             memory={memory}
           />
         </div>

@@ -1,6 +1,6 @@
 .timeline {
   display: grid;
-  gap: var(--space-5);
+  gap: var(--space-4);
   position: relative;
 }
 
@@ -8,8 +8,8 @@
   background: linear-gradient(
     180deg,
     rgba(151, 95, 255, 0),
-    rgba(151, 95, 255, 0.55),
-    rgba(74, 214, 255, 0.08)
+    rgba(242, 138, 191, 0.42),
+    rgba(107, 187, 232, 0.12)
   );
   content: '';
   height: 100%;
@@ -39,7 +39,7 @@
 }
 
 .timeline-empty {
-  background: var(--glass-bg);
+  background: rgba(255, 253, 249, 0.88);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-6);

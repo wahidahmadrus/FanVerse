@@ -14,7 +14,7 @@ function HeroSection({ memories }) {
         <h1>Archive Your Fan Journey</h1>
         <p>
           Save your memories, celebrate your support, and build your own
-          universe as a fan.
+          universe as a fan. Fans don&apos;t end, nor do their stories.
         </p>
         <div className="actions hero-section__actions">
           <Button to="/signup">Start Your Archive</Button>

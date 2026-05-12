@@ -1,19 +1,61 @@
 import { useEffect, useMemo, useState } from 'react'
-import ArtistCard from '../../components/ArtistCard/ArtistCard.jsx'
+import { Link, useNavigate } from 'react-router-dom'
 import Button from '../../components/Button/Button.jsx'
 import EmptyState from '../../components/EmptyState/EmptyState.jsx'
 import FormMessage from '../../components/FormMessage/FormMessage.jsx'
 import LoadingState from '../../components/LoadingState/LoadingState.jsx'
-import MemoryCard from '../../components/MemoryCard/MemoryCard.jsx'
 import { getArtists } from '../../services/artistService.js'
 import { getPublicMemories } from '../../services/memoryService.js'
 import './ExplorePage.css'
 
+const formatDate = (date) =>
+  new Intl.DateTimeFormat('en', {
+    month: 'short',
+    day: 'numeric',
+  }).format(new Date(`${date}T00:00:00`))
+
+function ArtistListItem({ artist }) {
+  return (
+    <Link className="explore-page__artist-item" to={`/artists/${artist.id}`}>
+      <span className="explore-page__avatar">
+        {artist.image_url ? <img src={artist.image_url} alt="" /> : artist.name.slice(0, 2)}
+      </span>
+      <span>
+        <strong>{artist.name}</strong>
+        <small>{artist.category}</small>
+      </span>
+      <em>{artist.fanCount || 0} fans</em>
+    </Link>
+  )
+}
+
+function PublicMemoryItem({ memory }) {
+  const activityType = memory.activity_type || memory.type
+  const stars = memory.final_stars || memory.stars || 0
+  const hasProof = memory.has_proof || Boolean(memory.proof_image_url)
+
+  return (
+    <article className="explore-page__memory-item">
+      <div>
+        <strong>{memory.title}</strong>
+        <span>{memory.artistName || memory.artist?.name || 'Unknown artist'}</span>
+        <p>{activityType} / {formatDate(memory.memory_date || memory.date)}</p>
+      </div>
+      <div>
+        <em>{stars} stars</em>
+        <small>{hasProof ? 'Proof Added' : 'Memory Only'}</small>
+      </div>
+    </article>
+  )
+}
+
 function ExplorePage() {
+  const navigate = useNavigate()
   const [artists, setArtists] = useState([])
   const [recentArtists, setRecentArtists] = useState([])
   const [memories, setMemories] = useState([])
   const [search, setSearch] = useState('')
+  const [showSuggestions, setShowSuggestions] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -48,6 +90,8 @@ function ExplorePage() {
       artist.name.toLowerCase().includes(search.trim().toLowerCase()),
     )
   }, [artists, search])
+  const suggestionArtists = search.trim() ? filteredArtists.slice(0, 6) : []
+  const featuredArtists = search.trim() ? filteredArtists.slice(0, 8) : artists.slice(0, 8)
 
   if (loading) {
     return <LoadingState label="Discovering the fan universe" />
@@ -79,23 +123,47 @@ function ExplorePage() {
           <span>Search artists</span>
           <input
             onChange={(event) => setSearch(event.target.value)}
+            onFocus={() => setShowSuggestions(true)}
             placeholder="Search for an artist in the universe..."
             type="search"
             value={search}
           />
         </label>
+        {showSuggestions && search.trim() && (
+          <div className="explore-page__suggestions">
+            {suggestionArtists.length > 0 ? (
+              suggestionArtists.map((artist) => (
+                <button
+                  key={artist.id}
+                  onClick={() => navigate(`/artists/${artist.id}`)}
+                  type="button"
+                >
+                  <span>{artist.name}</span>
+                  <small>{artist.category}</small>
+                </button>
+              ))
+            ) : (
+              <div>
+                <p>Artist not found. Create this artist?</p>
+                <Button to="/create-artist" variant="secondary">
+                  Create Artist
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
       </section>
 
       <section className="page-section">
         <div className="section-heading">
-          <p className="section-kicker">Featured Artists</p>
-          <h2>Fan communities lighting up</h2>
+          <p className="section-kicker">{search.trim() ? 'Search Results' : 'Featured Artists'}</p>
+          <h2>{search.trim() ? 'Artists matching your search' : 'Fan communities lighting up'}</h2>
         </div>
 
-        {filteredArtists.length > 0 ? (
-          <div className="grid grid--3">
-            {filteredArtists.map((artist) => (
-              <ArtistCard artist={artist} key={artist.id} />
+        {featuredArtists.length > 0 ? (
+          <div className="explore-page__list">
+            {featuredArtists.map((artist) => (
+              <ArtistListItem artist={artist} key={artist.id} />
             ))}
           </div>
         ) : (
@@ -116,7 +184,7 @@ function ExplorePage() {
           </div>
           <div className="explore-page__mini-list">
             {recentArtists.map((artist) => (
-              <ArtistCard artist={artist} key={artist.id} />
+              <ArtistListItem artist={artist} key={artist.id} />
             ))}
           </div>
         </div>
@@ -129,7 +197,7 @@ function ExplorePage() {
           <div className="explore-page__memory-list">
             {memories.length > 0 ? (
               memories.map((memory) => (
-                <MemoryCard compact key={memory.id} memory={memory} />
+                <PublicMemoryItem key={memory.id} memory={memory} />
               ))
             ) : (
               <EmptyState

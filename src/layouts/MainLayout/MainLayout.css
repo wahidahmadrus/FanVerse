@@ -1,14 +1,14 @@
 .main-layout {
   background: var(--gradient-page);
   min-height: 100vh;
-  overflow: hidden;
+  overflow: clip;
   position: relative;
 }
 
 .main-layout::before {
   background-image:
-    radial-gradient(circle, rgba(255, 255, 255, 0.9) 0 1px, transparent 1px),
-    radial-gradient(circle, rgba(255, 212, 122, 0.8) 0 1px, transparent 1px);
+    radial-gradient(circle, rgba(141, 101, 216, 0.32) 0 1px, transparent 1px),
+    radial-gradient(circle, rgba(242, 138, 191, 0.28) 0 1px, transparent 1px);
   background-position:
     0 0,
     3rem 5rem;
@@ -17,26 +17,28 @@
     8rem 8rem;
   content: '';
   inset: 0;
-  opacity: 0.18;
+  opacity: 0.42;
   pointer-events: none;
   position: absolute;
 }
 
 .main-layout__stars {
   background:
-    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.8) 0 1px, transparent 2px),
-    radial-gradient(circle at 65% 12%, rgba(74, 214, 255, 0.7) 0 1px, transparent 2px),
-    radial-gradient(circle at 82% 76%, rgba(255, 212, 122, 0.7) 0 1px, transparent 2px),
-    radial-gradient(circle at 38% 88%, rgba(255, 107, 197, 0.7) 0 1px, transparent 2px);
+    radial-gradient(circle at 20% 30%, rgba(141, 101, 216, 0.28) 0 1px, transparent 2px),
+    radial-gradient(circle at 65% 12%, rgba(107, 187, 232, 0.34) 0 1px, transparent 2px),
+    radial-gradient(circle at 82% 76%, rgba(217, 153, 53, 0.32) 0 1px, transparent 2px),
+    radial-gradient(circle at 38% 88%, rgba(242, 138, 191, 0.34) 0 1px, transparent 2px);
   inset: 0;
   pointer-events: none;
+  opacity: 0.5;
   position: absolute;
 }
 
 .main-layout__glow {
   border-radius: 50%;
-  filter: blur(8px);
-  opacity: 0.26;
+  filter: blur(14px);
+  max-width: 42vw;
+  opacity: 0.12;
   pointer-events: none;
   position: absolute;
 }
@@ -44,7 +46,7 @@
 .main-layout__glow--one {
   background: var(--color-purple);
   height: 18rem;
-  left: -6rem;
+  left: 0;
   top: 15rem;
   width: 18rem;
 }
@@ -53,6 +55,12 @@
   background: var(--color-pink);
   bottom: 10rem;
   height: 16rem;
-  right: -5rem;
+  right: 0;
   width: 16rem;
+}
+
+@media (max-width: 680px) {
+  .main-layout__glow {
+    display: none;
+  }
 }

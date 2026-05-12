@@ -1,21 +1,32 @@
 .empty-state {
-  background: var(--glass-bg);
+  background: rgba(255, 253, 249, 0.88);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-soft);
   display: grid;
   gap: var(--space-3);
   justify-items: center;
-  padding: var(--space-7);
+  padding: var(--space-6);
   text-align: center;
 }
 
 .empty-state__star {
-  background: radial-gradient(circle at 30% 28%, #fff2c3, #8c5cff 72%);
+  background: radial-gradient(circle at 30% 28%, #fff2c3, #f28abf 42%, #8c5cff 78%);
   border-radius: 50%;
   box-shadow: var(--shadow-glow-strong);
   height: 4rem;
   width: 4rem;
+}
+
+@media (max-width: 680px) {
+  .empty-state {
+    padding: var(--space-5);
+  }
+
+  .empty-state__star {
+    height: 3rem;
+    width: 3rem;
+  }
 }
 
 .empty-state h2 {

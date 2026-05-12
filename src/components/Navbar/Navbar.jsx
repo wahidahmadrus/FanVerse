@@ -6,23 +6,27 @@ import './Navbar.css'
 const publicLinks = [
   { label: 'Home', to: '/' },
   { label: 'Explore', to: '/explore' },
-  { label: 'Artists', to: '/artists' },
 ]
 
-const privateLinks = [
-  { label: 'Dashboard', to: '/dashboard' },
-  { label: 'My Archive', to: '/my-archive' },
-  { label: 'Universe', to: '/universe' },
+const desktopPrivateLinks = [
+  { label: 'Home', to: '/dashboard' },
+  { label: 'Explore', to: '/explore' },
   { label: 'Add Memory', to: '/add-memory' },
   { label: 'Profile', to: '/profile' },
 ]
 
 function Navbar() {
   const { profile, user } = useAuth()
-  const adminLinks = profile?.role === 'admin' ? [{ label: 'Admin', to: '/admin' }] : []
-  const navLinks = user
-    ? [...publicLinks, ...privateLinks, ...adminLinks]
-    : publicLinks
+  const navLinks = user ? desktopPrivateLinks : publicLinks
+  const mobileHome = user ? '/dashboard' : '/'
+  const mobileProfile = user ? '/profile' : '/signin'
+  const initials =
+    profile?.display_name
+      ?.split(' ')
+      .map((part) => part[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase() || 'FV'
 
   const handleSignOut = async () => {
     await signOut()
@@ -31,9 +35,7 @@ function Navbar() {
   return (
     <header className="navbar">
       <NavLink aria-label="FanVerse Archive home" className="navbar__brand" to="/">
-        <span className="navbar__mark" aria-hidden="true">
-          FV
-        </span>
+        <img src="/logo.jpeg" className="navbar__mark" alt="FanVerse logo" />
         <span>
           <strong>FanVerse</strong>
           <span>Archive</span>
@@ -54,7 +56,11 @@ function Navbar() {
           </NavLink>
         ))}
         {user ? (
-          <button className="navbar__link navbar__link--button" onClick={handleSignOut} type="button">
+          <button
+            className="navbar__link navbar__link--button"
+            onClick={handleSignOut}
+            type="button"
+          >
             Sign Out
           </button>
         ) : (
@@ -77,6 +83,49 @@ function Navbar() {
             </NavLink>
           </>
         )}
+      </nav>
+      <NavLink
+        aria-label="Open profile"
+        className="navbar__avatar"
+        to={mobileProfile}
+      >
+        {profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : initials}
+      </NavLink>
+
+      <nav className="navbar__bottom" aria-label="Mobile navigation">
+        <NavLink
+          className={({ isActive }) =>
+            isActive ? 'navbar__bottom-link navbar__bottom-link--active' : 'navbar__bottom-link'
+          }
+          end={!user}
+          to={mobileHome}
+        >
+          <span>Home</span>
+        </NavLink>
+        <NavLink
+          className={({ isActive }) =>
+            isActive ? 'navbar__bottom-link navbar__bottom-link--active' : 'navbar__bottom-link'
+          }
+          to="/explore"
+        >
+          <span>Explore</span>
+        </NavLink>
+        <NavLink
+          className={({ isActive }) =>
+            isActive ? 'navbar__bottom-link navbar__bottom-link--active' : 'navbar__bottom-link'
+          }
+          to="/add-memory"
+        >
+          <span>Add</span>
+        </NavLink>
+        <NavLink
+          className={({ isActive }) =>
+            isActive ? 'navbar__bottom-link navbar__bottom-link--active' : 'navbar__bottom-link'
+          }
+          to={mobileProfile}
+        >
+          <span>Profile</span>
+        </NavLink>
       </nav>
     </header>
   )

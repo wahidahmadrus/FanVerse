@@ -1,0 +1,155 @@
+.collectible-card {
+  background: rgba(255, 253, 249, 0.9);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  overflow: visible;
+  padding: var(--space-3);
+}
+
+.collectible-card--rare.collectible-card--unlocked {
+  border-color: rgba(107, 187, 232, 0.55);
+  box-shadow: 0 16px 42px rgba(107, 187, 232, 0.18);
+}
+
+.collectible-card--epic.collectible-card--unlocked {
+  border-color: rgba(141, 101, 216, 0.52);
+  box-shadow: 0 16px 48px rgba(141, 101, 216, 0.2);
+}
+
+.collectible-card--legendary.collectible-card--unlocked {
+  border-color: rgba(217, 153, 53, 0.52);
+  box-shadow: 0 16px 52px rgba(217, 153, 53, 0.22);
+}
+
+.collectible-card--monthly-special.collectible-card--unlocked {
+  border-color: rgba(255, 107, 197, 0.42);
+}
+
+.collectible-card__image-wrap {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  margin: 0 auto;
+  max-width: 20rem;
+  overflow: visible;
+  position: relative;
+  width: 100%;
+}
+
+.collectible-card__image-wrap--image {
+  background: transparent;
+  border-radius: var(--radius-lg);
+}
+
+.collectible-card__image-wrap--placeholder {
+  aspect-ratio: 3 / 4;
+  background:
+    radial-gradient(circle at 28% 24%, rgba(217, 153, 53, 0.18), transparent 24%),
+    linear-gradient(135deg, rgba(42, 22, 71, 0.08), rgba(242, 138, 191, 0.16));
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.collectible-card__image-wrap--image::after {
+  background: transparent;
+  border-radius: var(--radius-lg);
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  transition: background var(--transition-base);
+}
+
+.collectible-card--locked .collectible-card__image-wrap::after {
+  background: rgba(255, 253, 249, 0.28);
+}
+
+.collectible-card__image {
+  border-radius: var(--radius-lg);
+  display: block;
+  height: auto;
+  object-fit: contain;
+  width: 100%;
+}
+
+.collectible-card--locked .collectible-card__image {
+  filter: grayscale(0.35) saturate(0.75) brightness(0.9);
+}
+
+.collectible-card__placeholder {
+  align-items: center;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  padding: var(--space-4);
+  text-align: center;
+  width: 100%;
+}
+
+.collectible-card__placeholder span {
+  color: var(--color-white);
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.collectible-card__body {
+  display: grid;
+  gap: var(--space-3);
+  flex: 1;
+  min-width: 0;
+  padding: 0 var(--space-1) var(--space-1);
+}
+
+.collectible-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.collectible-card__meta span,
+.collectible-card small {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.28rem 0.6rem;
+}
+
+.collectible-card h3 {
+  color: var(--color-white);
+  font-size: 1.08rem;
+  margin: 0;
+}
+
+.collectible-card p {
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.collectible-card__story {
+  background: rgba(248, 239, 255, 0.7);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  padding: var(--space-3);
+}
+
+@media (max-width: 680px) {
+  .collectible-card {
+    gap: var(--space-2);
+    min-width: 0;
+    padding: var(--space-2);
+  }
+
+  .collectible-card__body {
+    gap: var(--space-2);
+    padding: var(--space-3);
+  }
+}

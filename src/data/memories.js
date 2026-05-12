@@ -5,9 +5,11 @@ export const activityTypes = [
   'Voting',
   'Fan Art',
   'Fan Event',
+  'Fan Meet',
   'Merch',
   'Social Support',
   'Personal Memory',
+  'Special Moment',
 ]
 
 export const memoryActivityTypes = activityTypes.filter((type) => type !== 'All')

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import ArtistCard from '../../components/ArtistCard/ArtistCard.jsx'
 import Button from '../../components/Button/Button.jsx'
 import EmptyState from '../../components/EmptyState/EmptyState.jsx'
@@ -8,8 +9,10 @@ import { getArtists } from '../../services/artistService.js'
 import './ArtistsPage.css'
 
 function ArtistsPage() {
+  const navigate = useNavigate()
   const [artists, setArtists] = useState([])
   const [search, setSearch] = useState('')
+  const [showSuggestions, setShowSuggestions] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -37,6 +40,7 @@ function ArtistsPage() {
       artist.name.toLowerCase().includes(search.trim().toLowerCase()),
     )
   }, [artists, search])
+  const suggestions = search.trim() ? filteredArtists.slice(0, 6) : []
 
   if (loading) {
     return <LoadingState label="Loading artists" />
@@ -58,13 +62,39 @@ function ArtistsPage() {
 
       <FormMessage type="error">{error}</FormMessage>
 
-      <section className="artists-page__search glass-panel">
-        <input
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search artists..."
-          type="search"
-          value={search}
-        />
+      <section className="artists-page__controls">
+        <div className="artists-page__search glass-panel">
+          <input
+            onChange={(event) => setSearch(event.target.value)}
+            onFocus={() => setShowSuggestions(true)}
+            placeholder="Search artists..."
+            type="search"
+            value={search}
+          />
+          {showSuggestions && search.trim() && (
+            <div className="artists-page__suggestions">
+              {suggestions.length > 0 ? (
+                suggestions.map((artist) => (
+                  <button
+                    key={artist.id}
+                    onClick={() => navigate(`/artists/${artist.id}`)}
+                    type="button"
+                  >
+                    <strong>{artist.name}</strong>
+                    <span>{artist.category}</span>
+                  </button>
+                ))
+              ) : (
+                <div>
+                  <p>This artist is not in the universe yet.</p>
+                  <Button to="/create-artist" variant="secondary">
+                    Create Artist
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </section>
 
       {filteredArtists.length > 0 ? (

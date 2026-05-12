@@ -1,5 +1,5 @@
 .artist-card {
-  background: var(--glass-bg);
+  background: rgba(255, 253, 249, 0.88);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-soft);
@@ -11,9 +11,9 @@
   align-items: center;
   aspect-ratio: 16 / 10;
   background:
-    radial-gradient(circle at 34% 28%, rgba(255, 212, 122, 0.78), transparent 18%),
-    radial-gradient(circle at 70% 70%, rgba(255, 107, 197, 0.6), transparent 20%),
-    linear-gradient(135deg, rgba(151, 95, 255, 0.42), rgba(74, 214, 255, 0.16));
+    radial-gradient(circle at 34% 28%, rgba(217, 153, 53, 0.35), transparent 18%),
+    radial-gradient(circle at 70% 70%, rgba(242, 138, 191, 0.38), transparent 20%),
+    linear-gradient(135deg, rgba(141, 101, 216, 0.2), rgba(107, 187, 232, 0.18));
   display: flex;
   justify-content: center;
 }
@@ -27,7 +27,7 @@
 
 .artist-card__image span {
   align-items: center;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 253, 249, 0.78);
   border: 1px solid var(--color-border-bright);
   border-radius: 50%;
   color: var(--color-white);
@@ -42,7 +42,7 @@
 .artist-card__content {
   display: grid;
   gap: var(--space-3);
-  padding: var(--space-5);
+  padding: var(--space-4);
 }
 
 .artist-card__topline span,
@@ -57,7 +57,7 @@
 
 .artist-card h3 {
   color: var(--color-white);
-  font-size: 1.35rem;
+  font-size: 1.12rem;
   margin: 0;
 }
 
@@ -75,4 +75,20 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
+}
+
+@media (max-width: 680px) {
+  .artist-card__image {
+    aspect-ratio: 16 / 7;
+  }
+
+  .artist-card__content {
+    gap: var(--space-2);
+    padding: var(--space-3);
+  }
+
+  .artist-card p {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
 }

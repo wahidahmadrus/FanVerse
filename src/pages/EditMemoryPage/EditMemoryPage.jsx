@@ -8,6 +8,8 @@ import { useAuth } from '../../context/useAuth.js'
 import { memoryActivityTypes, moodOptions } from '../../data/memories.js'
 import { getArtists } from '../../services/artistService.js'
 import { getUserMemoryById, updateMemory } from '../../services/memoryService.js'
+import { getProofRewardPreview } from '../../services/rewardService.js'
+import { STORAGE_BUCKETS, uploadImage, validateImageFile } from '../../services/uploadService.js'
 import './EditMemoryPage.css'
 
 const createFormData = (memory) => ({
@@ -17,7 +19,6 @@ const createFormData = (memory) => ({
   memoryDate: memory.memory_date || '',
   mood: memory.mood || 'Excited',
   description: memory.description || '',
-  stars: String(memory.stars || 0),
   proofImageUrl: memory.proof_image_url || '',
   visibility: memory.visibility || 'public',
 })
@@ -28,6 +29,8 @@ function EditMemoryPage() {
   const { user } = useAuth()
   const [artists, setArtists] = useState([])
   const [formData, setFormData] = useState(null)
+  const [proofFile, setProofFile] = useState(null)
+  const [proofPreview, setProofPreview] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -58,6 +61,26 @@ function EditMemoryPage() {
     setFormData((currentData) => ({ ...currentData, [name]: value }))
   }
 
+  const handleProofChange = (event) => {
+    const file = event.target.files?.[0]
+    setError('')
+
+    if (!file) {
+      setProofFile(null)
+      return
+    }
+
+    try {
+      validateImageFile(file)
+      setProofFile(file)
+      setProofPreview(URL.createObjectURL(file))
+    } catch (fileError) {
+      setProofFile(null)
+      setProofPreview('')
+      setError(fileError.message)
+    }
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault()
     setError('')
@@ -75,6 +98,13 @@ function EditMemoryPage() {
 
     try {
       setSaving(true)
+      const uploadedProofUrl = proofFile
+        ? await uploadImage({
+            bucket: STORAGE_BUCKETS.memoryProofs,
+            file: proofFile,
+            folder: user.id,
+          })
+        : ''
       await updateMemory({
         memoryId,
         userId: user.id,
@@ -85,11 +115,12 @@ function EditMemoryPage() {
           memoryDate: formData.memoryDate,
           mood: formData.mood,
           description: formData.description.trim(),
-          stars: Number(formData.stars) || 0,
-          proofImageUrl: formData.proofImageUrl.trim(),
+          proofImageUrl: uploadedProofUrl || formData.proofImageUrl,
           visibility: formData.visibility,
         },
       })
+      setProofFile(null)
+      setProofPreview('')
       setMessage('Your memory has been updated.')
     } catch (submitError) {
       setError(submitError.message)
@@ -114,6 +145,9 @@ function EditMemoryPage() {
       </div>
     )
   }
+
+  const rewardPreview = getProofRewardPreview(formData.activityType)
+  const hasProof = Boolean(proofFile || formData.proofImageUrl)
 
   return (
     <div className="page-shell edit-memory-page">
@@ -186,30 +220,16 @@ function EditMemoryPage() {
           </label>
         </div>
 
-        <div className="edit-memory-page__form-grid">
-          <label>
-            <span>Mood</span>
-            <select name="mood" onChange={handleChange} value={formData.mood}>
-              {moodOptions.map((mood) => (
-                <option key={mood} value={mood}>
-                  {mood}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span>Stars earned</span>
-            <input
-              min="0"
-              name="stars"
-              onChange={handleChange}
-              required
-              type="number"
-              value={formData.stars}
-            />
-          </label>
-        </div>
+        <label>
+          <span>Mood</span>
+          <select name="mood" onChange={handleChange} value={formData.mood}>
+            {moodOptions.map((mood) => (
+              <option key={mood} value={mood}>
+                {mood}
+              </option>
+            ))}
+          </select>
+        </label>
 
         <label>
           <span>Description</span>
@@ -222,15 +242,33 @@ function EditMemoryPage() {
           ></textarea>
         </label>
 
-        <label>
-          <span>Proof image URL optional</span>
-          <input
-            name="proofImageUrl"
-            onChange={handleChange}
-            type="url"
-            value={formData.proofImageUrl}
-          />
+        <div className="edit-memory-page__reward glass-panel">
+          <strong>
+            {hasProof
+              ? `Proof reward: ${rewardPreview.proofStars} stars`
+              : `Base reward: ${rewardPreview.baseStars} stars`}
+          </strong>
+          <span>If you add proof: {rewardPreview.proofStars} stars</span>
+          {hasProof && <p>Proof added. 2x stars activated.</p>}
+        </div>
+
+        <label className="edit-memory-page__upload">
+          <span>Verification Image optional</span>
+          <input accept="image/jpeg,image/png,image/webp" onChange={handleProofChange} type="file" />
+          <small>
+            Add proof to make this memory more authentic and earn 2x stars.
+            Optional: upload a ticket, screenshot, event photo, or any proof
+            connected to this memory.
+          </small>
         </label>
+
+        {(proofPreview || formData.proofImageUrl) && (
+          <img
+            alt="Memory proof preview"
+            className="edit-memory-page__proof-preview"
+            src={proofPreview || formData.proofImageUrl}
+          />
+        )}
 
         <fieldset>
           <legend>Visibility</legend>

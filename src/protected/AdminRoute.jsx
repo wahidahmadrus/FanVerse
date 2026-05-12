@@ -13,7 +13,7 @@ function AdminRoute() {
     return <Navigate replace to="/signin" />
   }
 
-  if (profile?.role !== 'admin') {
+  if (profile?.role !== 'admin' && !profile?.is_admin) {
     return <Navigate replace to="/dashboard" />
   }
 

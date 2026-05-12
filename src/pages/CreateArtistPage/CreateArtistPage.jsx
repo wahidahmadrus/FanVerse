@@ -4,25 +4,48 @@ import Button from '../../components/Button/Button.jsx'
 import FormMessage from '../../components/FormMessage/FormMessage.jsx'
 import { useAuth } from '../../context/useAuth.js'
 import { createArtist } from '../../services/artistService.js'
+import { STORAGE_BUCKETS, uploadImage, validateImageFile } from '../../services/uploadService.js'
 import './CreateArtistPage.css'
 
 const initialFormData = {
   name: '',
   category: '',
   description: '',
-  imageUrl: '',
 }
 
 function CreateArtistPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [formData, setFormData] = useState(initialFormData)
+  const [imageFile, setImageFile] = useState(null)
+  const [imagePreview, setImagePreview] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   const handleChange = (event) => {
     const { name, value } = event.target
     setFormData((currentData) => ({ ...currentData, [name]: value }))
+  }
+
+  const handleImageChange = (event) => {
+    const file = event.target.files?.[0]
+    setError('')
+
+    if (!file) {
+      setImageFile(null)
+      setImagePreview('')
+      return
+    }
+
+    try {
+      validateImageFile(file)
+      setImageFile(file)
+      setImagePreview(URL.createObjectURL(file))
+    } catch (fileError) {
+      setImageFile(null)
+      setImagePreview('')
+      setError(fileError.message)
+    }
   }
 
   const handleSubmit = async (event) => {
@@ -41,13 +64,20 @@ function CreateArtistPage() {
 
     try {
       setLoading(true)
+      const imageUrl = imageFile
+        ? await uploadImage({
+            bucket: STORAGE_BUCKETS.artistImages,
+            file: imageFile,
+            folder: user.id,
+          })
+        : ''
       const artist = await createArtist({
         userId: user.id,
         artist: {
           name: formData.name.trim(),
           category: formData.category.trim(),
           description: formData.description.trim(),
-          imageUrl: formData.imageUrl.trim(),
+          imageUrl,
         },
       })
 
@@ -109,18 +139,24 @@ function CreateArtistPage() {
         </label>
 
         <label>
-          <span>Image URL optional</span>
+          <span>Artist image optional</span>
           <input
-            name="imageUrl"
-            onChange={handleChange}
-            placeholder="https://example.com/artist.jpg"
-            type="url"
-            value={formData.imageUrl}
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handleImageChange}
+            type="file"
           />
         </label>
 
+        {imagePreview && (
+          <img
+            alt="Artist preview"
+            className="create-artist-page__preview"
+            src={imagePreview}
+          />
+        )}
+
         <Button disabled={loading} type="submit">
-          {loading ? 'Creating...' : 'Create Artist Archive'}
+          {loading ? 'Uploading...' : 'Create Artist Archive'}
         </Button>
       </form>
     </div>

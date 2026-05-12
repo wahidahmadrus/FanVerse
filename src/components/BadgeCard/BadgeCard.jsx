@@ -1,3 +1,4 @@
+import ShareButton from '../ShareButton/ShareButton.jsx'
 import './BadgeCard.css'
 
 function BadgeCard({ badge, compact = false }) {
@@ -16,6 +17,14 @@ function BadgeCard({ badge, compact = false }) {
           <span>{badge.unlocked ? 'Unlocked' : 'Locked'}</span>
         </div>
         <p>{badge.description}</p>
+        {badge.unlocked && !compact && (
+          <ShareButton
+            text={`I just unlocked '${badge.title}' on FanVerse Archive. My fan journey keeps growing.`}
+            title={badge.title}
+          >
+            Share Badge
+          </ShareButton>
+        )}
       </div>
     </article>
   )

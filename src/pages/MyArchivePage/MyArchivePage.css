@@ -1,42 +1,107 @@
 .my-archive-page__header {
   align-items: end;
   display: grid;
-  gap: var(--space-5);
+  gap: var(--space-4);
   grid-template-columns: 1fr auto;
+  margin-bottom: var(--space-5);
+  min-width: 0;
 }
 
 .my-archive-page__filters {
   display: grid;
   gap: var(--space-3);
-  margin: 0 0 var(--space-7);
+  margin: 0 0 var(--space-5);
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+}
+
+.my-archive-page__search-row {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: minmax(0, 1fr) minmax(10rem, 0.24fr);
+  min-width: 0;
+}
+
+.my-archive-page__search-row input,
+.my-archive-page__search-row select {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  min-width: 0;
+  outline: none;
+  padding: 0.72rem 0.95rem;
+  width: 100%;
 }
 
 .my-archive-page__filters > div {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
+  max-width: 100%;
+  min-width: 0;
 }
 
 .my-archive-page__filter {
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(255, 253, 249, 0.82);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-pill);
   color: var(--color-muted);
   cursor: pointer;
+  font-size: 0.84rem;
   font-weight: 800;
-  padding: 0.65rem 0.95rem;
+  max-width: 100%;
+  padding: 0.58rem 0.85rem;
+  white-space: normal;
 }
 
 .my-archive-page__filter:hover,
 .my-archive-page__filter--active {
-  background: rgba(151, 95, 255, 0.22);
-  border-color: rgba(255, 255, 255, 0.28);
-  color: var(--color-white);
+  background: #f6edff;
+  border-color: rgba(141, 101, 216, 0.28);
+  color: var(--color-purple);
 }
 
 @media (max-width: 760px) {
   .my-archive-page__header {
     align-items: start;
+    gap: 0.875rem;
     grid-template-columns: 1fr;
+  }
+
+  .my-archive-page__header .button {
+    justify-self: stretch;
+    width: 100%;
+  }
+}
+
+@media (max-width: 680px) {
+  .my-archive-page__search-row {
+    grid-template-columns: 1fr;
+  }
+
+  .my-archive-page__filters {
+    gap: 0.75rem;
+    margin-bottom: var(--space-4);
+  }
+
+  .my-archive-page__filters > div {
+    flex-wrap: wrap;
+    overflow: visible;
+    padding: 0;
+  }
+
+  .my-archive-page__filter {
+    flex: 1 1 auto;
+    min-height: 2.35rem;
+    padding: 0.48rem 0.68rem;
+    text-align: center;
+  }
+
+  .my-archive-page__search-row input,
+  .my-archive-page__search-row select {
+    font-size: 0.95rem;
+    padding: 0.66rem 0.85rem;
   }
 }

@@ -4,7 +4,7 @@ import {
   useMemo,
   useState,
 } from 'react'
-import { getProfile } from '../services/profileService.js'
+import { ensureProfile } from '../services/profileService.js'
 import { isSupabaseConfigured, supabase } from '../services/supabaseClient.js'
 import { AuthContext } from './authContextValue.js'
 
@@ -15,14 +15,18 @@ export function AuthProvider({ children }) {
   const [authError, setAuthError] = useState('')
 
   const refreshProfile = useCallback(
-    async (userId) => {
-      if (!userId || !isSupabaseConfigured) {
+    async (userOrId) => {
+      if (!userOrId || !isSupabaseConfigured) {
         setProfile(null)
         return null
       }
 
       try {
-        const nextProfile = await getProfile(userId)
+        const userData =
+          typeof userOrId === 'string'
+            ? { id: userOrId, user_metadata: {} }
+            : userOrId
+        const nextProfile = await ensureProfile(userData)
         setProfile(nextProfile)
         return nextProfile
       } catch (error) {
@@ -54,7 +58,7 @@ export function AuthProvider({ children }) {
       setSession(data.session)
 
       if (data.session?.user) {
-        await refreshProfile(data.session.user.id)
+        await refreshProfile(data.session.user)
       }
 
       setLoading(false)
@@ -68,7 +72,7 @@ export function AuthProvider({ children }) {
       setSession(nextSession)
 
       if (nextSession?.user) {
-        refreshProfile(nextSession.user.id)
+        refreshProfile(nextSession.user)
       } else {
         setProfile(null)
       }
