@@ -43,7 +43,7 @@ function SignInPage() {
   }
 
   return (
-    <div className="page-shell signin-page">
+    <div className="page-shell narrow-container signin-page">
       <section className="signin-page__panel glass-panel">
         <div>
           <p className="section-kicker">Sign In</p>

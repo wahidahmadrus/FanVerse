@@ -71,7 +71,7 @@ function UniversePage() {
   }
 
   return (
-    <div className="page-shell universe-page">
+    <div className="page-shell wide-container universe-page">
       <section className="universe-page__header">
         <div className="section-heading">
           <p className="section-kicker">Universe</p>

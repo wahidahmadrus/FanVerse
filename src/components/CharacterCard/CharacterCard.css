@@ -29,6 +29,16 @@
   overflow: hidden;
 }
 
+.character-card__portrait--back {
+  aspect-ratio: 3 / 4;
+  background:
+    radial-gradient(circle at 24% 18%, rgba(242, 138, 191, 0.25), transparent 24%),
+    linear-gradient(145deg, rgba(42, 22, 71, 0.9), rgba(141, 101, 216, 0.5));
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
 .character-card__portrait--placeholder::before,
 .character-card__portrait--placeholder::after {
   border: 1px solid rgba(255, 255, 255, 0.58);
@@ -56,6 +66,11 @@
   width: 100%;
 }
 
+.character-card__portrait--back img {
+  height: 100%;
+  object-fit: cover;
+}
+
 .character-card__portrait span {
   align-items: center;
   background: rgba(255, 253, 249, 0.82);
@@ -70,6 +85,16 @@
   position: relative;
   width: 5rem;
   z-index: 1;
+}
+
+.character-card__portrait--back span {
+  border-radius: var(--radius-pill);
+  font-size: 1rem;
+  height: auto;
+  max-width: 10rem;
+  padding: 0.72rem 1rem;
+  text-align: center;
+  width: auto;
 }
 
 .character-card--en .character-card__portrait {
@@ -94,6 +119,12 @@
   background:
     radial-gradient(circle at 78% 62%, rgba(242, 138, 191, 0.26), transparent 25%),
     linear-gradient(135deg, rgba(141, 101, 216, 0.3), rgba(242, 138, 191, 0.2));
+}
+
+.character-card .character-card__portrait--back {
+  background:
+    radial-gradient(circle at 24% 18%, rgba(242, 138, 191, 0.25), transparent 24%),
+    linear-gradient(145deg, rgba(42, 22, 71, 0.9), rgba(141, 101, 216, 0.5));
 }
 
 .character-card .character-card__portrait--image {

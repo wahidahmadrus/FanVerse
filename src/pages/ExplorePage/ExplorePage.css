@@ -3,6 +3,7 @@
   display: grid;
   gap: var(--space-5);
   grid-template-columns: 1fr auto;
+  margin-bottom: var(--space-5);
 }
 
 .explore-page__hero h1 {
@@ -197,11 +198,98 @@
   width: 100%;
 }
 
+.explore-page__setup {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.explore-page__setup .section-heading {
+  margin-bottom: 0;
+}
+
+.explore-page__saving {
+  color: var(--color-muted);
+  font-weight: 800;
+  margin: 0;
+}
+
+.explore-page__fandom-card {
+  align-items: center;
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: minmax(8rem, 0.28fr) minmax(0, 1fr);
+  margin-bottom: var(--space-5);
+  padding: var(--space-5);
+}
+
+.explore-page__fandom-image {
+  align-items: center;
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, #f8d7ef, #dcefff);
+  border: 2px solid rgba(255, 255, 255, 0.82);
+  border-radius: 50%;
+  color: var(--color-purple);
+  display: flex;
+  font-size: 1.4rem;
+  font-weight: 900;
+  justify-content: center;
+  justify-self: center;
+  max-width: 11rem;
+  overflow: hidden;
+  width: 100%;
+}
+
+.explore-page__fandom-image img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.explore-page__fandom-card h2,
+.explore-page__fandom-card p {
+  margin: 0;
+}
+
+.explore-page__fandom-card h2 {
+  color: var(--color-white);
+  font-size: clamp(1.55rem, 4vw, 2.4rem);
+}
+
+.explore-page__fandom-card p:not(.section-kicker) {
+  color: var(--color-muted);
+  margin-top: var(--space-2);
+}
+
+.explore-page__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.explore-page__stats span {
+  background: #f6edff;
+  border: 1px solid rgba(141, 101, 216, 0.14);
+  border-radius: var(--radius-pill);
+  color: var(--color-purple);
+  font-size: 0.8rem;
+  font-weight: 900;
+  padding: 0.34rem 0.62rem;
+}
+
 @media (max-width: 900px) {
   .explore-page__hero,
-  .explore-page__split {
+  .explore-page__split,
+  .explore-page__fandom-card {
     align-items: start;
     grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 1280px) {
+  .explore-page__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -212,6 +300,11 @@
 
   .explore-page__search {
     padding: var(--space-3);
+  }
+
+  .explore-page__setup,
+  .explore-page__fandom-card {
+    padding: var(--space-4);
   }
 
   .explore-page__search input {

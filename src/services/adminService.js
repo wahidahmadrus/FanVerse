@@ -35,9 +35,38 @@ const getRowsWithFallback = async ({ fallbackQuery, query }) => {
   return getRows(fallbackQuery)
 }
 
+const getDeleteUserFunctionError = async (error) => {
+  const fallbackMessage = 'This user could not be permanently deleted.'
+  const rawMessage = error?.message || fallbackMessage
+  const isFunctionReachabilityError =
+    error?.name === 'FunctionsFetchError' ||
+    rawMessage.toLowerCase().includes('failed to send a request')
+
+  if (isFunctionReachabilityError) {
+    return (
+      'Delete user Edge Function could not be reached. Deploy the delete-user ' +
+      'function and set SUPABASE_SERVICE_ROLE_KEY in Supabase secrets, then try again.'
+    )
+  }
+
+  if (error?.context && typeof error.context.json === 'function') {
+    try {
+      const body = await error.context.json()
+
+      if (body?.error) {
+        return body.error
+      }
+    } catch {
+      // Keep the original Functions error when the response is not JSON.
+    }
+  }
+
+  return rawMessage
+}
+
 export const getAdminDashboard = async () => {
   const client = requireSupabase()
-  const [profiles, artists, memories, badges, fanLinks, userBadges] =
+  const [profiles, artists, memories, badges, fanLinks, userBadges, userCards] =
     await Promise.all([
       getRows(
         client
@@ -67,8 +96,9 @@ export const getAdminDashboard = async () => {
           .select('*')
           .order('created_at', { ascending: false }),
       ),
-      getRows(client.from('artist_fans').select('id')),
-      getRows(client.from('user_badges').select('id')),
+      getRows(client.from('artist_fans').select('id, user_id')),
+      getRows(client.from('user_badges').select('id, user_id')),
+      getRows(client.from('user_collectible_cards').select('id, user_id')),
     ])
 
   return {
@@ -78,6 +108,7 @@ export const getAdminDashboard = async () => {
     badges,
     fanLinks,
     userBadges,
+    userCards,
   }
 }
 
@@ -114,6 +145,23 @@ export const updateProfileAdmin = async ({ profileId, updates }) => {
 
   if (error) {
     throw error
+  }
+
+  return data
+}
+
+export const deleteUserAdmin = async ({ userId }) => {
+  const client = requireSupabase()
+  const { data, error } = await client.functions.invoke('delete-user', {
+    body: { userId },
+  })
+
+  if (error) {
+    throw new Error(await getDeleteUserFunctionError(error))
+  }
+
+  if (data?.error) {
+    throw new Error(data.error)
   }
 
   return data

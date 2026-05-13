@@ -12,7 +12,7 @@ function CTASection() {
       <div className="actions cta-section__actions">
         <Button to="/signup">Start Your Archive</Button>
         <Button to="/explore" variant="secondary">
-          Explore Artists
+          Find Your Fandom
         </Button>
       </div>
     </section>

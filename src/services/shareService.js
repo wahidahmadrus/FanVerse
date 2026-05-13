@@ -1,9 +1,4 @@
-export const shareAchievement = async ({ title, text }) => {
-  if (navigator.share) {
-    await navigator.share({ title, text })
-    return 'Ready to share.'
-  }
+import { shareText } from '../utils/shareUtils.js'
 
-  await navigator.clipboard.writeText(text)
-  return 'Copied. Ready to share!'
-}
+export const shareAchievement = async ({ title, text, url }) =>
+  shareText({ title, text, url })

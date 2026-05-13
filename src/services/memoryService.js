@@ -30,13 +30,42 @@ export const normalizeMemory = (memory) => ({
   authorEmail: memory.profile?.email || '',
 })
 
-export const getPublicMemories = async ({ artistId, limit } = {}) => {
+export const getPublicMemories = async ({ artistId, excludeUserId, limit } = {}) => {
   const client = requireSupabase()
   let query = client
     .from('memories')
     .select(memorySelect)
     .eq('visibility', 'public')
     .order('created_at', { ascending: false })
+
+  if (artistId) {
+    query = query.eq('artist_id', artistId)
+  }
+
+  if (excludeUserId) {
+    query = query.neq('user_id', excludeUserId)
+  }
+
+  if (limit) {
+    query = query.limit(limit)
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    throw error
+  }
+
+  return (data || []).map(normalizeMemory)
+}
+
+export const getUserMemories = async ({ artistId, userId, limit } = {}) => {
+  const client = requireSupabase()
+  let query = client
+    .from('memories')
+    .select(memorySelect)
+    .eq('user_id', userId)
+    .order('memory_date', { ascending: false })
 
   if (artistId) {
     query = query.eq('artist_id', artistId)
@@ -55,25 +84,18 @@ export const getPublicMemories = async ({ artistId, limit } = {}) => {
   return (data || []).map(normalizeMemory)
 }
 
-export const getUserMemories = async ({ userId, limit } = {}) => {
+export const getUserMemoryCount = async (userId) => {
   const client = requireSupabase()
-  let query = client
+  const { count, error } = await client
     .from('memories')
-    .select(memorySelect)
+    .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
-    .order('memory_date', { ascending: false })
-
-  if (limit) {
-    query = query.limit(limit)
-  }
-
-  const { data, error } = await query
 
   if (error) {
     throw error
   }
 
-  return (data || []).map(normalizeMemory)
+  return count || 0
 }
 
 export const getUserMemoryById = async ({ memoryId, userId }) => {
@@ -97,6 +119,10 @@ export const getUserMemoryById = async ({ memoryId, userId }) => {
 }
 
 export const createMemory = async ({ memory, userId }) => {
+  if (!memory.artistId) {
+    throw new Error('Choose or create your fandom before archiving a memory.')
+  }
+
   const client = requireSupabase()
   const hasProof = Boolean(memory.proofImageUrl)
   const reward = calculateMemoryReward({
@@ -124,6 +150,17 @@ export const createMemory = async ({ memory, userId }) => {
     .single()
 
   if (error) {
+    if (
+      error.code === '23503' ||
+      error.message?.includes('memories_artist_id_fkey') ||
+      error.message?.toLowerCase().includes('foreign key')
+    ) {
+      console.error('Memory insert failed because artist_id was invalid:', error)
+      throw new Error(
+        'This memory could not be archived because the fandom was not found. Please choose or create your fandom again.',
+      )
+    }
+
     throw error
   }
 

@@ -26,6 +26,81 @@
   font-weight: 900;
 }
 
+.collectibles-page__draw,
+.collectibles-page__complete {
+  align-items: center;
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: minmax(0, 1fr) minmax(14rem, 0.32fr);
+  margin-bottom: var(--space-5);
+  min-width: 0;
+  padding: var(--space-4);
+}
+
+.collectibles-page__draw-copy,
+.collectibles-page__complete > div:first-child {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.collectibles-page__draw-copy h2,
+.collectibles-page__draw-copy p,
+.collectibles-page__complete h2,
+.collectibles-page__complete p {
+  margin: 0;
+}
+
+.collectibles-page__draw-copy h2,
+.collectibles-page__complete h2 {
+  color: var(--color-white);
+}
+
+.collectibles-page__draw-copy p,
+.collectibles-page__complete p,
+.collectibles-page__draw-action strong,
+.collectibles-page__complete-stats span {
+  color: var(--color-muted);
+}
+
+.collectibles-page__draw-action,
+.collectibles-page__complete-stats {
+  align-items: stretch;
+  display: grid;
+  gap: var(--space-2);
+  justify-items: stretch;
+  min-width: 0;
+}
+
+.collectibles-page__draw-action strong {
+  font-size: 0.92rem;
+  font-weight: 900;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.collectibles-page__draw-action .button,
+.collectibles-page__complete-stats .share-button,
+.collectibles-page__complete-stats .share-button-wrap {
+  width: 100%;
+}
+
+.collectibles-page__draw-action .button {
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.collectibles-page__complete {
+  border-color: rgba(217, 153, 53, 0.4);
+}
+
+.collectibles-page__complete-stats strong {
+  color: var(--color-white);
+  font-size: 2rem;
+  line-height: 1;
+}
+
 .collectibles-page__controls {
   display: grid;
   gap: var(--space-3);
@@ -116,7 +191,7 @@
 .collectibles-page__cards {
   display: grid;
   gap: 1.125rem;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 20rem));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 18rem));
   justify-content: start;
 }
 
@@ -129,6 +204,95 @@
   padding: var(--space-5);
   position: fixed;
   z-index: 50;
+}
+
+.collectibles-page__reveal-overlay {
+  align-items: center;
+  background: rgba(42, 22, 71, 0.42);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: var(--space-5);
+  position: fixed;
+  z-index: 55;
+}
+
+.collectibles-page__reveal-modal {
+  background: var(--gradient-paper);
+  border: 1px solid var(--color-border-bright);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-deep);
+  display: grid;
+  gap: var(--space-3);
+  max-width: 32rem;
+  min-width: 0;
+  padding: var(--space-5);
+  width: min(100%, 32rem);
+}
+
+.collectibles-page__draw-card-back,
+.collectibles-page__reveal-card-image {
+  align-items: center;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-lg);
+  display: flex;
+  justify-content: center;
+  justify-self: center;
+  max-width: 14rem;
+  min-width: 0;
+  overflow: hidden;
+  width: min(100%, 14rem);
+}
+
+.collectibles-page__draw-card-back {
+  background:
+    radial-gradient(circle at 24% 18%, rgba(242, 138, 191, 0.25), transparent 24%),
+    linear-gradient(145deg, rgba(42, 22, 71, 0.9), rgba(141, 101, 216, 0.5));
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.collectibles-page__draw-card-back img,
+.collectibles-page__reveal-card-image img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.collectibles-page__draw-card-back span,
+.collectibles-page__reveal-card-image span {
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: var(--radius-pill);
+  color: var(--color-white);
+  font-weight: 900;
+  max-width: 10rem;
+  padding: 0.72rem 1rem;
+  text-align: center;
+}
+
+.collectibles-page__reveal-card-image {
+  background: rgba(255, 253, 249, 0.62);
+  border: 1px solid var(--color-border);
+}
+
+.collectibles-page__reveal-modal h2,
+.collectibles-page__reveal-modal p {
+  margin: 0;
+}
+
+.collectibles-page__reveal-modal h2 {
+  color: var(--color-white);
+}
+
+.collectibles-page__reveal-modal p {
+  color: var(--color-muted);
+}
+
+.collectibles-page__reveal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
 }
 
 .collectibles-page__history-modal {
@@ -253,7 +417,9 @@
 }
 
 @media (max-width: 760px) {
-  .collectibles-page__header {
+  .collectibles-page__header,
+  .collectibles-page__draw,
+  .collectibles-page__complete {
     align-items: start;
     grid-template-columns: 1fr;
   }
@@ -288,6 +454,16 @@
 
   .collectibles-page__choice-prompt .button {
     width: 100%;
+  }
+
+  .collectibles-page__draw,
+  .collectibles-page__complete {
+    padding: var(--space-3);
+  }
+
+  .collectibles-page__draw-action .button {
+    min-height: 2.6rem;
+    white-space: normal;
   }
 
   .collectibles-page__controls {
@@ -329,7 +505,8 @@
     scroll-snap-align: none;
   }
 
-  .collectibles-page__history-overlay {
+  .collectibles-page__history-overlay,
+  .collectibles-page__reveal-overlay {
     align-items: stretch;
     padding: max(0.75rem, env(safe-area-inset-top)) 0.75rem
       max(0.75rem, env(safe-area-inset-bottom));
@@ -339,6 +516,20 @@
     border-radius: var(--radius-lg);
     max-height: none;
     padding: var(--space-3);
+  }
+
+  .collectibles-page__reveal-modal {
+    align-content: start;
+    border-radius: var(--radius-lg);
+    padding: var(--space-3);
+  }
+
+  .collectibles-page__reveal-actions {
+    flex-direction: column;
+  }
+
+  .collectibles-page__reveal-actions .button {
+    width: 100%;
   }
 
   .collectibles-page__history-close {

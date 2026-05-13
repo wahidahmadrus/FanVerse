@@ -5,12 +5,12 @@ import './Navbar.css'
 
 const publicLinks = [
   { label: 'Home', to: '/' },
-  { label: 'Explore', to: '/explore' },
+  { label: 'Fandom', to: '/explore' },
 ]
 
 const desktopPrivateLinks = [
   { label: 'Home', to: '/dashboard' },
-  { label: 'Explore', to: '/explore' },
+  { label: 'Fandom', to: '/explore' },
   { label: 'Add Memory', to: '/add-memory' },
   { label: 'Profile', to: '/profile' },
 ]
@@ -108,7 +108,7 @@ function Navbar() {
           }
           to="/explore"
         >
-          <span>Explore</span>
+          <span>Fandom</span>
         </NavLink>
         <NavLink
           className={({ isActive }) =>

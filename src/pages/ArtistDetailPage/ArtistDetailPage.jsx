@@ -91,7 +91,7 @@ function ArtistDetailPage() {
   }
 
   return (
-    <div className="page-shell artist-detail-page">
+    <div className="page-shell content-container artist-detail-page">
       <FormMessage type="success">{message}</FormMessage>
       <FormMessage type="error">{error}</FormMessage>
 

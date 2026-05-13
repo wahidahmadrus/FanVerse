@@ -4,6 +4,8 @@ import ShareButton from '../ShareButton/ShareButton.jsx'
 import { createCharacterShareText } from '../../data/archiveCharacters.js'
 import './CharacterCard.css'
 
+const cardBackUrl = '/images/card-back.png'
+
 function CharacterCard({
   actionLabel = 'View Story',
   actionTo,
@@ -19,8 +21,11 @@ function CharacterCard({
   shareLabel = 'Share Card',
   statusLabel = '',
 }) {
-  const imageSources = [imageUrl, character.cardImageUrl, character.imageUrl].filter(Boolean)
+  const imageSources = isUnlocked
+    ? [imageUrl, character.cardImageUrl, character.imageUrl].filter(Boolean)
+    : []
   const [failedImageUrls, setFailedImageUrls] = useState([])
+  const [cardBackFailed, setCardBackFailed] = useState(false)
   const [loadedImageUrl, setLoadedImageUrl] = useState('')
   const displayImage = imageSources.find(
     (imageSource) => !failedImageUrls.includes(imageSource),
@@ -40,14 +45,30 @@ function CharacterCard({
     <article className={cardClassName}>
       <div
         className={`character-card__portrait ${
-          displayImage
+          !isUnlocked
+            ? 'character-card__portrait--back'
+            : displayImage
             ? 'character-card__portrait--image'
             : 'character-card__portrait--placeholder'
         } ${
-          displayImage && !imageLoaded ? 'character-card__portrait--loading' : ''
+          isUnlocked && displayImage && !imageLoaded
+            ? 'character-card__portrait--loading'
+            : ''
         }`}
       >
-        {displayImage ? (
+        {!isUnlocked ? (
+          !cardBackFailed ? (
+            <img
+              alt="Mystery Archive Card"
+              decoding="async"
+              loading="lazy"
+              onError={() => setCardBackFailed(true)}
+              src={cardBackUrl}
+            />
+          ) : (
+            <span>Mystery Archive Card</span>
+          )
+        ) : displayImage ? (
           <img
             alt={`${character.name} collectible card`}
             decoding="async"
@@ -93,6 +114,9 @@ function CharacterCard({
           )}
           {showShare && (
             <ShareButton
+              fileName={`${character.name}.png`}
+              imageUrl={displayImage}
+              mode={displayImage ? 'image' : 'text'}
               text={createCharacterShareText(character)}
               title={`${character.name} - ${character.fullTitle}`}
             >

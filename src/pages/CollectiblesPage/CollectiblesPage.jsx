@@ -10,48 +10,102 @@ import ShareButton from '../../components/ShareButton/ShareButton.jsx'
 import StoryFragmentCard from '../../components/StoryFragmentCard/StoryFragmentCard.jsx'
 import { useAuth } from '../../context/useAuth.js'
 import {
-  archiveCharacters,
   createCharacterShareText,
-  getArchiveCharacterById,
   getCharacterFragments,
 } from '../../data/archiveCharacters.js'
 import {
   getCharacterCardImageSources,
   getCharacterCardImageUrl,
-  getFirstArchiveCharacterId,
 } from '../../services/characterCardService.js'
-import { getUserCollectibleCards } from '../../services/collectibleService.js'
+import {
+  drawArchiveCard,
+  getArchiveDrawStatus,
+  getCollectibleImageUrl,
+  getCollectibleThumbnailUrl,
+  getUserCollectibleCards,
+  isCharacterFragmentCard,
+} from '../../services/collectibleService.js'
+import {
+  getUserStats,
+  isCardConditionMet,
+} from '../../services/cardEligibilityService.js'
+import { getActiveCharacters } from '../../services/characterService.js'
 import { getActiveCharacterStoryFragments } from '../../services/storyFragmentService.js'
 import './CollectiblesPage.css'
 
 const rarityFilters = ['All', 'Common', 'Rare', 'Epic', 'Legendary', 'Monthly Special']
 const statusFilters = ['All', 'Unlocked', 'Locked']
-const storyCardTypes = ['character_story', 'monthly_premium']
+const cardBackUrl = '/images/card-back.png'
+const noEligibleDrawMessage =
+  'No cards are ready to unlock yet. Add more memories to unlock new cards for the draw.'
+
+const getCountdownText = ({ nextDrawAt, now }) => {
+  if (!nextDrawAt) {
+    return ''
+  }
+
+  const remainingMs = Math.max(0, new Date(nextDrawAt).getTime() - now)
+  const totalSeconds = Math.ceil(remainingMs / 1000)
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+
+  return `${String(hours).padStart(2, '0')}h ${String(minutes).padStart(
+    2,
+    '0',
+  )}m ${String(seconds).padStart(2, '0')}s`
+}
+
+const getLinkedCharacterFragmentCard = ({ cards, characterId }) =>
+  cards.find(
+    (card) =>
+      card.character_id === characterId &&
+      isCharacterFragmentCard(card) &&
+      card.unlocked,
+  ) ||
+  cards.find(
+    (card) =>
+      card.character_id === characterId && isCharacterFragmentCard(card),
+  ) ||
+  null
+
+const getDisplayCharacter = ({ character, isUnlocked }) =>
+  isUnlocked
+    ? character
+    : {
+        ...character,
+        cardImageUrl: '',
+        emotionalMeaning: 'Unlock through archive card draws.',
+        fullTitle: 'Premium Character Fragment',
+        imageUrl: '',
+        quote: '',
+        shortDescription:
+          'Draw from the Archive to reveal this character fragment.',
+      }
 
 function CharacterHistoryModal({
   cards,
   character,
-  firstCharacterId,
+  memoryCount,
   onClose,
   storyFragments,
 }) {
   const [failedImageUrls, setFailedImageUrls] = useState([])
-  const isChosenCharacter = firstCharacterId === character.id
-  const hasPremiumFragment = cards.some(
+  const hasCharacterCard = cards.some(
     (card) =>
       card.character_id === character.id &&
       card.unlocked &&
-      ['character_story', 'monthly_premium'].includes(card.card_type),
+      isCharacterFragmentCard(card),
   )
   const fragments = useMemo(
     () =>
       getCharacterFragments({
         character,
-        firstCharacterId,
+        hasCharacterCard,
         fragments: storyFragments,
-        hasPremiumFragment,
+        memoryCount,
       }),
-    [character, firstCharacterId, hasPremiumFragment, storyFragments],
+    [character, hasCharacterCard, memoryCount, storyFragments],
   )
   const imageSources = useMemo(
     () =>
@@ -128,17 +182,15 @@ function CharacterHistoryModal({
           </div>
 
           <div className="collectibles-page__history-copy">
-            <p className="section-kicker">Archive Zero Character</p>
+            <p className="section-kicker">Premium Character Fragment</p>
             <h2 id={`character-history-${character.id}`}>{character.name}</h2>
             <strong>{character.fullTitle}</strong>
-            {isChosenCharacter && (
-              <span className="collectibles-page__chosen-label">
-                Your chosen Archive card
-              </span>
-            )}
             <blockquote>{character.quote}</blockquote>
             <p>{character.emotionalMeaning}</p>
             <ShareButton
+              fileName={`${character.name}.png`}
+              imageUrl={characterImageUrl}
+              mode={characterImageUrl ? 'image' : 'text'}
               text={createCharacterShareText(character)}
               title={`${character.name} - ${character.fullTitle}`}
               variant="bright"
@@ -153,7 +205,11 @@ function CharacterHistoryModal({
             <StoryFragmentCard
               key={fragment.id}
               locked={!fragment.isUnlocked}
-              title={fragment.isUnlocked ? fragment.title : 'Locked Fragment'}
+              title={
+                fragment.isUnlocked
+                  ? fragment.title
+                  : `Fragment ${fragment.fragmentOrder}`
+              }
             >
               {fragment.isUnlocked ? fragment.content : fragment.lockedContent}
             </StoryFragmentCard>
@@ -167,27 +223,50 @@ function CharacterHistoryModal({
 function CollectiblesPage() {
   const { profile, user } = useAuth()
   const [cards, setCards] = useState([])
+  const [characters, setCharacters] = useState([])
+  const [drawStatus, setDrawStatus] = useState(null)
+  const [userStats, setUserStats] = useState(null)
+  const [memoryCount, setMemoryCount] = useState(0)
   const [storyFragments, setStoryFragments] = useState([])
   const [search, setSearch] = useState('')
   const [selectedRarity, setSelectedRarity] = useState('All')
   const [selectedStatus, setSelectedStatus] = useState('All')
   const [selectedHistoryCharacter, setSelectedHistoryCharacter] = useState(null)
+  const [revealedCard, setRevealedCard] = useState(null)
+  const [revealPhase, setRevealPhase] = useState('')
+  const [cardBackFailed, setCardBackFailed] = useState(false)
+  const [drawMessage, setDrawMessage] = useState('')
+  const [drawing, setDrawing] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [now, setNow] = useState(0)
 
   useEffect(() => {
     let cancelled = false
 
     const loadInitialCards = async () => {
       try {
-        const [nextCards, nextStoryFragments] = await Promise.all([
+        const [
+          nextCards,
+          nextCharacters,
+          nextStoryFragments,
+          nextUserStats,
+          nextDrawStatus,
+        ] = await Promise.all([
           getUserCollectibleCards(user.id),
+          getActiveCharacters(),
           getActiveCharacterStoryFragments(),
+          getUserStats(user.id),
+          getArchiveDrawStatus(user.id),
         ])
 
         if (!cancelled) {
           setCards(nextCards)
+          setCharacters(nextCharacters)
           setStoryFragments(nextStoryFragments)
+          setUserStats(nextUserStats)
+          setMemoryCount(nextUserStats.totalMemories)
+          setDrawStatus(nextDrawStatus)
         }
       } catch (loadError) {
         if (!cancelled) {
@@ -207,53 +286,176 @@ function CollectiblesPage() {
     }
   }, [user])
 
+  useEffect(() => {
+    const updateNow = () => setNow(Date.now())
+
+    updateNow()
+    const intervalId = window.setInterval(updateNow, 1000)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [])
+
+  const refreshCardsAndDrawStatus = async () => {
+    const [nextCards, nextDrawStatus, nextUserStats] = await Promise.all([
+      getUserCollectibleCards(user.id),
+      getArchiveDrawStatus(user.id),
+      getUserStats(user.id),
+    ])
+
+    setCards(nextCards)
+    setDrawStatus(nextDrawStatus)
+    setUserStats(nextUserStats)
+    setMemoryCount(nextUserStats.totalMemories)
+  }
+
+  const charactersById = useMemo(
+    () => new Map(characters.map((character) => [character.id, character])),
+    [characters],
+  )
+
+  const handleDrawCard = async () => {
+    if (!user?.id) {
+      return
+    }
+
+    try {
+      setDrawing(true)
+      setDrawMessage('')
+      setError('')
+      setRevealedCard(null)
+      setRevealPhase('back')
+
+      const result = await drawArchiveCard({ userId: user.id })
+
+      if (result.status === 'unlocked') {
+        setRevealedCard(result.card)
+        setDrawStatus(result.drawStatus)
+        window.setTimeout(() => setRevealPhase('revealed'), 720)
+      } else if (result.status === 'no_eligible') {
+        setRevealPhase('')
+        setDrawMessage(noEligibleDrawMessage)
+      } else if (result.status === 'complete') {
+        setRevealPhase('')
+        setDrawMessage('Archive Complete. You have unlocked every available card.')
+      } else if (result.status === 'cooldown') {
+        setRevealPhase('')
+        setDrawStatus(result.drawStatus)
+      }
+
+      await refreshCardsAndDrawStatus()
+    } catch (drawError) {
+      setRevealPhase('')
+      setError(drawError.message)
+    } finally {
+      setDrawing(false)
+    }
+  }
+
+  const handleViewRevealedCard = () => {
+    if (revealedCard && !isCharacterFragmentCard(revealedCard)) {
+      setSearch(revealedCard.title)
+      setSelectedStatus('Unlocked')
+      setSelectedRarity('All')
+    }
+
+    setRevealedCard(null)
+    setRevealPhase('')
+  }
+
   const filteredCards = useMemo(() => {
     const searchTerm = search.trim().toLowerCase()
 
     return cards.filter((card) => {
-      const character = getArchiveCharacterById(card.character_id)
+      const character = charactersById.get(card.character_id)
       const rarityMatches = selectedRarity === 'All' || card.rarity === selectedRarity
       const statusMatches =
         selectedStatus === 'All' ||
         (selectedStatus === 'Unlocked' ? card.unlocked : !card.unlocked)
       const searchMatches =
         !searchTerm ||
-        [
-          card.title,
-          card.description,
-          card.rarity,
-          card.unlock_condition_type,
-          card.card_type,
-          card.story_fragment,
-          character?.name,
-          character?.fullTitle,
-        ]
+        (card.unlocked
+          ? [
+              card.title,
+              card.description,
+              card.rarity,
+              card.unlock_condition_type,
+              card.card_type,
+              card.story_fragment,
+              character?.name,
+              character?.fullTitle,
+            ]
+          : [
+              card.rarity,
+              card.unlock_condition_type,
+              card.card_type,
+              isCharacterFragmentCard(card)
+                ? 'premium character fragment'
+                : 'mystery archive card',
+            ])
           .join(' ')
           .toLowerCase()
           .includes(searchTerm)
 
       return rarityMatches && statusMatches && searchMatches
     })
-  }, [cards, search, selectedRarity, selectedStatus])
+  }, [cards, charactersById, search, selectedRarity, selectedStatus])
 
-  const firstArchiveCharacterId = getFirstArchiveCharacterId({
-    profile,
-    userId: user.id,
-  })
+  const safeUserStats = userStats || {
+    totalMemories: 0,
+    totalStars: 0,
+    proofMemories: 0,
+    concertMemories: 0,
+    fanArtMemories: 0,
+    streamingMemories: 0,
+    votingMemories: 0,
+    supportedArtistCount: 0,
+  }
   const unlockedCount = cards.filter((card) => card.unlocked).length
-  const normalCards = filteredCards.filter(
-    (card) => !storyCardTypes.includes(card.card_type),
+  const allCardsUnlocked = cards.length > 0 && unlockedCount === cards.length
+  const eligibleDrawCards = cards.filter(
+    (card) =>
+      !card.unlocked &&
+      (isCharacterFragmentCard(card) || isCardConditionMet(card, safeUserStats)),
   )
+  const hasEligibleDrawCards = eligibleDrawCards.length > 0
+  const normalCards = filteredCards.filter((card) => !isCharacterFragmentCard(card))
   const unlockedCards = normalCards.filter((card) => card.unlocked)
   const lockedCards = normalCards.filter((card) => !card.unlocked)
   const hasRewardCards = normalCards.length > 0
+  const countdownText = getCountdownText({
+    nextDrawAt: drawStatus?.nextDrawAt,
+    now,
+  })
+  const cooldownComplete =
+    drawStatus?.nextDrawAt &&
+    new Date(drawStatus.nextDrawAt).getTime() <= now
+  const drawIsReady = Boolean(!drawStatus || drawStatus.canDraw || cooldownComplete)
+  const drawButtonLabel = allCardsUnlocked
+    ? 'All cards unlocked'
+    : drawing
+      ? 'Drawing...'
+      : drawIsReady
+        ? hasEligibleDrawCards
+          ? 'Draw Card'
+          : 'No cards ready'
+        : `Next draw available in ${countdownText}`
+  const revealedCharacter = charactersById.get(revealedCard?.character_id)
+  const revealedCardImage = revealedCard
+    ? getCollectibleThumbnailUrl(revealedCard) ||
+      getCollectibleImageUrl(revealedCard) ||
+      revealedCharacter?.cardImageUrl ||
+      revealedCharacter?.imageUrl ||
+      ''
+    : ''
 
   if (loading) {
     return <LoadingState label="Loading collectible cards" />
   }
 
   return (
-    <div className="page-shell collectibles-page">
+    <div className="page-shell wide-container collectibles-page">
       <ArchiveZeroCover />
 
       <section className="collectibles-page__header">
@@ -272,6 +474,53 @@ function CollectiblesPage() {
       </section>
 
       <FormMessage type="error">{error}</FormMessage>
+      <FormMessage type="success">{drawMessage}</FormMessage>
+
+      <section className="collectibles-page__draw glass-panel">
+        <div className="collectibles-page__draw-copy">
+          <p className="section-kicker">Daily Archive Draw</p>
+          <h2>Draw an Archive Card</h2>
+          <p>
+            Draw a card from the archive. You may receive a regular reward card
+            or a rare character fragment.
+          </p>
+        </div>
+        <div className="collectibles-page__draw-action">
+          <Button
+            disabled={
+              drawing || allCardsUnlocked || !hasEligibleDrawCards || !drawIsReady
+            }
+            onClick={handleDrawCard}
+            type="button"
+          >
+            {drawButtonLabel}
+          </Button>
+        </div>
+      </section>
+
+      {allCardsUnlocked && (
+        <section className="collectibles-page__complete glass-panel">
+          <div>
+            <p className="section-kicker">Archive Complete</p>
+            <h2>Archive Complete</h2>
+            <p>
+              You have unlocked every available card in the archive. New cards
+              will appear when the archive expands.
+            </p>
+          </div>
+          <div className="collectibles-page__complete-stats">
+            <strong>{unlockedCount}</strong>
+            <span>Total cards unlocked</span>
+            <ShareButton
+              text={`${profile?.display_name || 'A FanVerse fan'} completed their FanVerse Archive card collection.`}
+              title="FanVerse Archive Complete"
+              variant="bright"
+            >
+              Share Collection
+            </ShareButton>
+          </div>
+        </section>
+      )}
 
       <section className="collectibles-page__controls glass-panel" aria-label="Filter collectibles">
         <input
@@ -319,39 +568,42 @@ function CollectiblesPage() {
           <p className="section-kicker">Archive Zero</p>
           <h2>Premium Character Fragments</h2>
           <p>
-            Explore the Archive Zero characters, share their cards, and reveal
-            their story fragments.
+            Rare character cards unlock their own story fragments as your
+            memory archive grows.
           </p>
         </div>
 
-        {!firstArchiveCharacterId && (
-          <div className="collectibles-page__choice-prompt glass-panel">
-            <p>
-              Choose your first Archive card to unlock a second fragment.
-            </p>
-            <Button to="/onboarding/first-card">Choose First Card</Button>
-          </div>
-        )}
-
         <div className="grid grid--4 collectibles-page__characters">
-          {archiveCharacters.map((character) => {
-            const isChosenCharacter = firstArchiveCharacterId === character.id
+          {characters.map((character) => {
+            const linkedCard = getLinkedCharacterFragmentCard({
+              cards,
+              characterId: character.id,
+            })
+            const isUnlocked = Boolean(linkedCard?.unlocked)
+            const displayCharacter = getDisplayCharacter({
+              character,
+              isUnlocked,
+            })
 
             return (
               <CharacterCard
-                actionLabel="Show History"
-                character={character}
+                actionLabel={isUnlocked ? 'Show History' : 'Locked'}
+                character={displayCharacter}
                 compact
-                imageUrl={getCharacterCardImageUrl({ cards, character })}
-                isSelected={isChosenCharacter}
-                isUnlocked={isChosenCharacter}
-                key={character.id}
-                onAction={() => setSelectedHistoryCharacter(character)}
-                showQuote={false}
-                showShare
-                statusLabel={
-                  isChosenCharacter ? 'Your chosen Archive card' : ''
+                disabled={!isUnlocked}
+                imageUrl={
+                  isUnlocked ? getCharacterCardImageUrl({ cards, character }) : ''
                 }
+                isUnlocked={isUnlocked}
+                key={character.id}
+                onAction={() => {
+                  if (isUnlocked) {
+                    setSelectedHistoryCharacter(character)
+                  }
+                }}
+                showQuote={false}
+                showShare={isUnlocked}
+                statusLabel={isUnlocked ? 'Unlocked' : 'Locked'}
               />
             )
           })}
@@ -370,7 +622,9 @@ function CollectiblesPage() {
                 {unlockedCards.map((card) => (
                   <CollectibleCard
                     card={card}
+                    character={charactersById.get(card.character_id)}
                     key={card.id}
+                    userStats={safeUserStats}
                     username={profile?.display_name || 'A FanVerse fan'}
                   />
                 ))}
@@ -388,7 +642,9 @@ function CollectiblesPage() {
                 {lockedCards.map((card) => (
                   <CollectibleCard
                     card={card}
+                    character={charactersById.get(card.character_id)}
                     key={card.id}
+                    userStats={safeUserStats}
                     username={profile?.display_name || 'A FanVerse fan'}
                   />
                 ))}
@@ -407,10 +663,82 @@ function CollectiblesPage() {
         <CharacterHistoryModal
           cards={cards}
           character={selectedHistoryCharacter}
-          firstCharacterId={firstArchiveCharacterId}
+          memoryCount={memoryCount}
           onClose={() => setSelectedHistoryCharacter(null)}
           storyFragments={storyFragments}
         />
+      )}
+
+      {revealPhase && (
+        <div
+          className="collectibles-page__reveal-overlay"
+          onMouseDown={() => {
+            setRevealedCard(null)
+            setRevealPhase('')
+          }}
+          role="presentation"
+        >
+          <section
+            aria-labelledby="archive-draw-reveal"
+            aria-modal="true"
+            className="collectibles-page__reveal-modal"
+            onMouseDown={(event) => event.stopPropagation()}
+            role="dialog"
+          >
+            <p className="section-kicker">Archive Draw</p>
+            {revealPhase !== 'revealed' || !revealedCard ? (
+              <>
+                <div className="collectibles-page__draw-card-back">
+                  {!cardBackFailed ? (
+                    <img
+                      alt="Mystery Archive Card"
+                      onError={() => setCardBackFailed(true)}
+                      src={cardBackUrl}
+                    />
+                  ) : (
+                    <span>Mystery Archive Card</span>
+                  )}
+                </div>
+                <h2 id="archive-draw-reveal">Drawing from the Archive...</h2>
+              </>
+            ) : (
+              <>
+                <div className="collectibles-page__reveal-card-image">
+                  {revealedCardImage ? (
+                    <img
+                      alt={`${revealedCard.title} collectible card`}
+                      src={revealedCardImage}
+                    />
+                  ) : (
+                    <span>{revealedCard.rarity}</span>
+                  )}
+                </div>
+                <h2 id="archive-draw-reveal">
+                  You unlocked: {revealedCard.title}
+                </h2>
+                <p>{revealedCard.description}</p>
+                <div className="collectibles-page__reveal-actions">
+                  <Button onClick={handleViewRevealedCard} type="button">
+                    View in Collection
+                  </Button>
+                  {isCharacterFragmentCard(revealedCard) && revealedCharacter && (
+                    <Button
+                      onClick={() => {
+                        setRevealedCard(null)
+                        setRevealPhase('')
+                        setSelectedHistoryCharacter(revealedCharacter)
+                      }}
+                      type="button"
+                      variant="secondary"
+                    >
+                      Show History
+                    </Button>
+                  )}
+                </div>
+              </>
+              )}
+          </section>
+        </div>
       )}
     </div>
   )

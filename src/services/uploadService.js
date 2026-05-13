@@ -5,6 +5,7 @@ export const STORAGE_BUCKETS = {
   memoryProofs: 'memory-proofs',
   avatars: 'avatars',
   artistImages: 'artist-images',
+  characterImages: 'character-images',
   collectibleCards: 'collectible-cards',
 }
 

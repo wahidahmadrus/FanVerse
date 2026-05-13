@@ -1,15 +1,24 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '../../components/Button/Button.jsx'
+import FandomArtistSelector from '../../components/FandomArtistSelector/FandomArtistSelector.jsx'
 import FormMessage from '../../components/FormMessage/FormMessage.jsx'
 import { useAuth } from '../../context/useAuth.js'
-import { updateProfile, upsertProfile } from '../../services/profileService.js'
+import { getArtistById } from '../../services/artistService.js'
 import { signOut } from '../../services/authService.js'
+import {
+  getMainFandomName,
+  getProfileCompletedValue,
+  shouldShowProfileCompletion,
+  updateProfile,
+  upsertProfile,
+} from '../../services/profileService.js'
 import { STORAGE_BUCKETS, uploadImage, validateImageFile } from '../../services/uploadService.js'
 import './ProfilePage.css'
 
 const adminLinks = [
   { label: 'Main Admin Dashboard', to: '/admin' },
+  { label: 'Manage Characters', to: '/admin/characters' },
   { label: 'Manage Collectible Cards', to: '/admin/collectibles' },
   { label: 'Manage Premium Stories / Character Fragments', to: '/admin/stories' },
   { label: 'Manage Users', to: '/admin/users' },
@@ -17,22 +26,55 @@ const adminLinks = [
   { label: 'Manage Badges', to: '/admin/badges' },
 ]
 
+const getInitialFormData = ({ profile, user }) => ({
+  display_name: profile?.display_name || user?.user_metadata?.display_name || '',
+  bio: profile?.bio || '',
+  favorite_artist: profile?.favorite_artist || '',
+  favorite_fandom_artist: getMainFandomName(profile),
+  main_artist_id: profile?.main_artist_id || '',
+  avatar_url: profile?.avatar_url || '',
+})
+
 function ProfilePage() {
   const navigate = useNavigate()
   const { profile, refreshProfile, user } = useAuth()
   const isAdmin = profile?.role === 'admin' || profile?.is_admin
-  const [formData, setFormData] = useState(() => ({
-    display_name: profile?.display_name || user?.user_metadata?.display_name || '',
-    bio: profile?.bio || '',
-    favorite_artist: profile?.favorite_artist || '',
-    avatar_url: profile?.avatar_url || '',
-  }))
+  const [formData, setFormData] = useState(() => getInitialFormData({ profile, user }))
+  const [selectedArtist, setSelectedArtist] = useState(null)
   const [saving, setSaving] = useState(false)
   const [avatarFile, setAvatarFile] = useState(null)
   const [avatarPreview, setAvatarPreview] = useState('')
   const [showMobileActions, setShowMobileActions] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    let cancelled = false
+
+    if (!formData.main_artist_id) {
+      return undefined
+    }
+
+    const loadSelectedArtist = async () => {
+      try {
+        const artist = await getArtistById(formData.main_artist_id)
+
+        if (!cancelled) {
+          setSelectedArtist(artist)
+        }
+      } catch {
+        if (!cancelled) {
+          setSelectedArtist(null)
+        }
+      }
+    }
+
+    loadSelectedArtist()
+
+    return () => {
+      cancelled = true
+    }
+  }, [formData.main_artist_id])
 
   const handleChange = (event) => {
     const { name, value } = event.target
@@ -60,6 +102,55 @@ function ProfilePage() {
     }
   }
 
+  const handleFandomSelected = async (artist, result) => {
+    setSelectedArtist(artist)
+    setFormData((currentData) => ({
+      ...currentData,
+      favorite_artist: artist.name,
+      favorite_fandom_artist: artist.name,
+      main_artist_id: artist.id,
+    }))
+    setError('')
+
+    const displayName =
+      formData.display_name.trim() ||
+      user.user_metadata?.display_name ||
+      user.email?.split('@')[0] ||
+      'Fan Explorer'
+    const nextProfile = {
+      ...profile,
+      display_name: displayName,
+      main_artist_id: artist.id,
+    }
+    const payload = {
+      user_id: user.id,
+      email: profile?.email || user.email || '',
+      display_name: displayName,
+      bio: formData.bio.trim(),
+      favorite_artist: artist.name,
+      favorite_fandom_artist: artist.name,
+      main_artist_id: artist.id,
+      profile_completed: getProfileCompletedValue(nextProfile),
+      avatar_url: formData.avatar_url || null,
+    }
+
+    try {
+      if (profile) {
+        await updateProfile(user.id, payload)
+      } else {
+        await upsertProfile(payload)
+      }
+
+      await refreshProfile(user.id)
+      setMessage(
+        payload.profile_completed ? 'Your fan profile is ready.' : result.message,
+      )
+    } catch (saveError) {
+      setError(saveError.message)
+      throw saveError
+    }
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault()
     setError('')
@@ -67,6 +158,11 @@ function ProfilePage() {
 
     if (!formData.display_name.trim()) {
       setError('Your fan profile needs a display name.')
+      return
+    }
+
+    if (!formData.main_artist_id) {
+      setError('Choose your fandom before saving your fan profile.')
       return
     }
 
@@ -79,13 +175,27 @@ function ProfilePage() {
             folder: user.id,
           })
         : formData.avatar_url
+      const fandomName =
+        selectedArtist?.name ||
+        formData.favorite_fandom_artist.trim() ||
+        formData.favorite_artist.trim()
+      const nextProfile = {
+        ...profile,
+        display_name: formData.display_name.trim(),
+        main_artist_id: formData.main_artist_id,
+      }
       const payload = {
         user_id: user.id,
+        email: profile?.email || user.email || '',
         display_name: formData.display_name.trim(),
         bio: formData.bio.trim(),
-        favorite_artist: formData.favorite_artist.trim(),
+        favorite_artist: fandomName,
+        favorite_fandom_artist: fandomName,
+        main_artist_id: formData.main_artist_id,
+        profile_completed: getProfileCompletedValue(nextProfile),
         avatar_url: avatarUrl || null,
       }
+      const wasIncomplete = shouldShowProfileCompletion(profile)
 
       if (profile) {
         await updateProfile(user.id, payload)
@@ -97,10 +207,16 @@ function ProfilePage() {
       setFormData((currentData) => ({
         ...currentData,
         avatar_url: avatarUrl || '',
+        favorite_artist: fandomName,
+        favorite_fandom_artist: fandomName,
       }))
       setAvatarFile(null)
       setAvatarPreview('')
-      setMessage('Your fan profile has been updated.')
+      setMessage(
+        wasIncomplete && payload.profile_completed
+          ? 'Your fan profile is ready.'
+          : 'Your fan profile has been updated.',
+      )
     } catch (submitError) {
       setError(submitError.message)
     } finally {
@@ -114,17 +230,23 @@ function ProfilePage() {
   }
 
   return (
-    <div className="page-shell profile-page">
+    <div className="page-shell form-container profile-page">
       <section className="profile-page__header">
         <div className="section-heading">
           <p className="section-kicker">Profile</p>
           <h1>Your fan identity</h1>
           <p>
-            Create a gentle profile around your fandom, favorite artist, and the
+            Create a gentle profile around your Main Fandom / Artist and the
             memories you want to preserve.
           </p>
         </div>
       </section>
+
+      {shouldShowProfileCompletion(profile) && (
+        <div className="profile-page__inline-helper" role="status">
+          Complete your fan profile by adding your name and choosing your fandom.
+        </div>
+      )}
 
       <section className="profile-page__layout">
         <aside className="profile-page__preview glass-panel">
@@ -137,7 +259,11 @@ function ProfilePage() {
           </div>
           <h2>{formData.display_name || 'Fan Explorer'}</h2>
           <p>{formData.bio || 'Archive your journey and celebrate every memory.'}</p>
-          <strong>{formData.favorite_artist || 'Favorite artist not set yet'}</strong>
+          <strong>
+            {selectedArtist?.name ||
+              formData.favorite_fandom_artist ||
+              'Main Fandom / Artist not set yet'}
+          </strong>
           <button
             className="profile-page__actions-toggle"
             onClick={() => setShowMobileActions((isOpen) => !isOpen)}
@@ -165,11 +291,19 @@ function ProfilePage() {
           </div>
         </aside>
 
-        <form className="profile-page__form glass-panel" onSubmit={handleSubmit}>
+        <form
+          className="profile-page__form glass-panel"
+          id="fan-profile-form"
+          onSubmit={handleSubmit}
+        >
           <FormMessage type="success">{message}</FormMessage>
           <FormMessage type="error">{error}</FormMessage>
 
-          <label>
+          <label
+            className={
+              !formData.display_name.trim() ? 'profile-page__field--missing' : ''
+            }
+          >
             <span>Display name</span>
             <input
               name="display_name"
@@ -191,20 +325,23 @@ function ProfilePage() {
             ></textarea>
           </label>
 
-          <label>
-            <span>Favorite artist</span>
-            <input
-              name="favorite_artist"
-              onChange={handleChange}
-              placeholder="Luna Ray"
-              type="text"
-              value={formData.favorite_artist}
-            />
-          </label>
+          <FandomArtistSelector
+            className={
+              !formData.main_artist_id ? 'profile-page__field--missing' : ''
+            }
+            defaultValue={formData.favorite_fandom_artist}
+            onArtistSelected={handleFandomSelected}
+            selectedArtist={selectedArtist}
+            userId={user.id}
+          />
 
           <label>
             <span>Avatar image optional</span>
-            <input accept="image/jpeg,image/png,image/webp" onChange={handleAvatarChange} type="file" />
+            <input
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handleAvatarChange}
+              type="file"
+            />
           </label>
 
           <Button disabled={saving} type="submit">
@@ -219,8 +356,8 @@ function ProfilePage() {
             <p className="section-kicker">Admin Panel</p>
             <h2>Admin Panel</h2>
             <p>
-              Jump into user, memory, badge, collectible, and story management
-              without typing routes by hand.
+              Jump into user, memory, badge, character, collectible, and story
+              management without typing routes by hand.
             </p>
           </div>
           <div className="profile-page__admin-links">

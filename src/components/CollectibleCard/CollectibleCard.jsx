@@ -2,26 +2,44 @@ import { useState } from 'react'
 import ShareButton from '../ShareButton/ShareButton.jsx'
 import { getArchiveCharacterById } from '../../data/archiveCharacters.js'
 import {
+  getCollectibleCardTypeLabel,
   getCollectibleImageUrl,
   getCollectibleThumbnailUrl,
+  isCharacterFragmentCard,
 } from '../../services/collectibleService.js'
+import { getLockedCardProgressText } from '../../services/cardEligibilityService.js'
 import './CollectibleCard.css'
 
-function CollectibleCard({ card, username = 'A FanVerse fan' }) {
-  const character = getArchiveCharacterById(card.character_id)
-  const imageSources = [...new Set([
-    getCollectibleThumbnailUrl(card),
-    getCollectibleImageUrl(card),
-    character?.cardImageUrl,
-    character?.imageUrl,
-  ].filter(Boolean))]
+const cardBackUrl = '/images/card-back.png'
+
+function CollectibleCard({
+  card,
+  character: providedCharacter,
+  username = 'A FanVerse fan',
+  userStats = {},
+}) {
+  const isUnlocked = Boolean(card.unlocked)
+  const character = providedCharacter || getArchiveCharacterById(card.character_id)
+  const imageSources = isUnlocked
+    ? [...new Set([
+        getCollectibleThumbnailUrl(card),
+        getCollectibleImageUrl(card),
+        character?.cardImageUrl,
+        character?.imageUrl,
+      ].filter(Boolean))]
+    : []
   const [failedImageUrls, setFailedImageUrls] = useState([])
   const [loadedImageUrl, setLoadedImageUrl] = useState('')
+  const [cardBackFailed, setCardBackFailed] = useState(false)
   const cardImage = imageSources.find(
     (imageSource) => !failedImageUrls.includes(imageSource),
   )
-  const cardTypeLabel = (card.card_type || 'normal_reward').replaceAll('_', ' ')
-  const shouldShowImage = Boolean(cardImage)
+  const cardTypeLabel = getCollectibleCardTypeLabel(card)
+  const progressText = getLockedCardProgressText(card, userStats)
+  const shareImageUrl = isUnlocked ? getCollectibleImageUrl(card) || cardImage : ''
+  const showStoryFragment =
+    isUnlocked && card.story_fragment && !isCharacterFragmentCard(card)
+  const shouldShowImage = isUnlocked && Boolean(cardImage)
   const imageLoaded = loadedImageUrl === cardImage
 
   return (
@@ -29,12 +47,12 @@ function CollectibleCard({ card, username = 'A FanVerse fan' }) {
       className={`collectible-card collectible-card--${card.rarity
         .toLowerCase()
         .replaceAll(' ', '-')} ${
-        card.unlocked ? 'collectible-card--unlocked' : 'collectible-card--locked'
+        isUnlocked ? 'collectible-card--unlocked' : 'collectible-card--locked'
       }`}
     >
       <div
         className={`collectible-card__image-wrap ${
-          shouldShowImage
+          shouldShowImage || !isUnlocked
             ? 'collectible-card__image-wrap--image'
             : 'collectible-card__image-wrap--placeholder'
         } ${
@@ -43,7 +61,22 @@ function CollectibleCard({ card, username = 'A FanVerse fan' }) {
             : ''
         }`}
       >
-        {shouldShowImage ? (
+        {!isUnlocked ? (
+          !cardBackFailed ? (
+            <img
+              alt="Mystery Archive Card"
+              className="collectible-card__image collectible-card__image--back"
+              decoding="async"
+              loading="lazy"
+              onError={() => setCardBackFailed(true)}
+              src={cardBackUrl}
+            />
+          ) : (
+            <div className="collectible-card__placeholder collectible-card__placeholder--back">
+              <span>Mystery Archive Card</span>
+            </div>
+          )
+        ) : shouldShowImage ? (
           <img
             alt={`${card.title} collectible card`}
             className="collectible-card__image"
@@ -59,35 +92,43 @@ function CollectibleCard({ card, username = 'A FanVerse fan' }) {
           />
         ) : (
           <div className="collectible-card__placeholder">
-            <span>{character?.name || card.rarity}</span>
+            <span>{card.rarity}</span>
           </div>
         )}
       </div>
       <div className="collectible-card__body">
         <div className="collectible-card__meta">
           <span>{card.rarity}</span>
-          <span>{cardTypeLabel}</span>
-          <span>{card.unlocked ? 'Unlocked' : 'Locked'}</span>
-          {character && <span>{character.name}</span>}
+          {isUnlocked && <span>{cardTypeLabel}</span>}
+          <span>{isUnlocked ? 'Unlocked' : 'Locked'}</span>
+          {isUnlocked && character && <span>{character.name}</span>}
         </div>
-        <h3>{card.title}</h3>
-        <p>{card.description}</p>
-        {card.story_fragment && (
+        <h3>{isUnlocked ? card.title : 'Mystery Archive Card'}</h3>
+        <p>{isUnlocked ? card.description : progressText}</p>
+        {showStoryFragment && (
           <p className="collectible-card__story">{card.story_fragment}</p>
         )}
-        {!card.unlocked && (
-          <small>
-            Condition: {card.unlock_condition_type.replaceAll('_', ' ')} x
-            {card.unlock_condition_value}
-          </small>
-        )}
-        {card.unlocked && (
-          <ShareButton
-            text={`${username} unlocked '${card.title}' on FanVerse Archive.`}
-            title={card.title}
-          >
-            Share Card
-          </ShareButton>
+        {isUnlocked && (
+          <div className="collectible-card__share-actions">
+            <ShareButton
+              fileName={`${card.title}.png`}
+              imageUrl={shareImageUrl}
+              mode="image"
+              text={`${username} unlocked '${card.title}' on FanVerse Archive.`}
+              title={card.title}
+            >
+              Share Card
+            </ShareButton>
+            {shareImageUrl && (
+              <a
+                className="collectible-card__download"
+                download={`${card.title}.png`}
+                href={shareImageUrl}
+              >
+                Download Image
+              </a>
+            )}
+          </div>
         )}
       </div>
     </article>

@@ -45,6 +45,12 @@
   width: 100%;
 }
 
+@media (min-width: 1280px) {
+  .universe-page__galaxies {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 800px) {
   .universe-page__header,
   .universe-page__galaxies {

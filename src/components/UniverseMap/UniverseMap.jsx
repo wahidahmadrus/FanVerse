@@ -34,7 +34,16 @@ const globePosition = { x: 50, y: 50 }
 function UniverseMap({ memories, title = 'Recent Memories Galaxy' }) {
   const [selectedMemory, setSelectedMemory] = useState(null)
   const memoryStars = memories.slice(0, 16)
-  const activeMemory = selectedMemory || memoryStars[0]
+
+  const handleOpenMemory = (event, memory) => {
+    event.stopPropagation()
+    setSelectedMemory(memory)
+  }
+
+  const handleCloseMemory = (event) => {
+    event.stopPropagation()
+    setSelectedMemory(null)
+  }
 
   return (
     <section className="universe-map" aria-label={title}>
@@ -43,7 +52,11 @@ function UniverseMap({ memories, title = 'Recent Memories Galaxy' }) {
         <h2>{title}</h2>
       </header>
 
-      <div className="universe-map__space">
+      <div
+        className="universe-map__space"
+        onClick={() => setSelectedMemory(null)}
+        role="presentation"
+      >
         {memoryStars.length > 0 && (
           <svg
             aria-hidden="true"
@@ -90,7 +103,7 @@ function UniverseMap({ memories, title = 'Recent Memories Galaxy' }) {
               aria-label={`${memory.title} memory star`}
               className={`universe-map__star universe-map__star--${getStarSize(stars)} universe-map__star--${getActivityClass(memory.activity_type || memory.type)} ${hasProof ? 'universe-map__star--proof' : ''}`}
               key={memory.id}
-              onClick={() => setSelectedMemory(memory)}
+              onClick={(event) => handleOpenMemory(event, memory)}
               style={{ left: `${position.x}%`, top: `${position.y}%` }}
               title={`${memory.title} / ${artistName} / ${stars} stars`}
               type="button"
@@ -105,24 +118,27 @@ function UniverseMap({ memories, title = 'Recent Memories Galaxy' }) {
           </div>
         )}
 
-        {activeMemory && (
-          <aside className="universe-map__details">
+        {selectedMemory && (
+          <aside
+            className="universe-map__details"
+            onClick={(event) => event.stopPropagation()}
+          >
             <button
               aria-label="Close star details"
-              onClick={() => setSelectedMemory(null)}
+              onClick={handleCloseMemory}
               type="button"
             >
               Close
             </button>
-            <strong>{activeMemory.title}</strong>
-            <span>{activeMemory.artistName || activeMemory.artist?.name || 'Unknown artist'}</span>
+            <strong>{selectedMemory.title}</strong>
+            <span>{selectedMemory.artistName || selectedMemory.artist?.name || 'Unknown artist'}</span>
             <p className="universe-map__details-meta">
               <span className="universe-map__details-activity">
-                {activeMemory.activity_type || activeMemory.type || 'Memory'}
+                {selectedMemory.activity_type || selectedMemory.type || 'Memory'}
               </span>
-              <span>{activeMemory.final_stars || activeMemory.stars || 0} stars</span>
+              <span>{selectedMemory.final_stars || selectedMemory.stars || 0} stars</span>
               <span>
-                {activeMemory.has_proof || activeMemory.proof_image_url
+                {selectedMemory.has_proof || selectedMemory.proof_image_url
                   ? 'Proof Added'
                   : 'Memory Only'}
               </span>

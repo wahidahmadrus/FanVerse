@@ -20,9 +20,13 @@ export const signUp = async ({ name, email, password }) => {
   if (data.user && data.session) {
     await upsertProfile({
       user_id: data.user.id,
+      email,
       display_name: name,
       bio: '',
       favorite_artist: '',
+      favorite_fandom_artist: '',
+      main_artist_id: null,
+      profile_completed: false,
       avatar_url: '',
     })
   }

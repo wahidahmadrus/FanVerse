@@ -2,58 +2,65 @@ import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import Button from '../../components/Button/Button.jsx'
 import EmptyState from '../../components/EmptyState/EmptyState.jsx'
+import LoadingState from '../../components/LoadingState/LoadingState.jsx'
 import ShareButton from '../../components/ShareButton/ShareButton.jsx'
 import StoryFragmentCard from '../../components/StoryFragmentCard/StoryFragmentCard.jsx'
 import { useAuth } from '../../context/useAuth.js'
 import {
   createCharacterShareText,
   getCharacterFragments,
-  getArchiveCharacterById,
 } from '../../data/archiveCharacters.js'
+import { getCharacterCardImageSources } from '../../services/characterCardService.js'
+import { getCharacterById } from '../../services/characterService.js'
 import {
-  getCharacterCardImageSources,
-  getFirstArchiveCharacterId,
-} from '../../services/characterCardService.js'
-import { getUserCollectibleCards } from '../../services/collectibleService.js'
+  getUserCollectibleCards,
+  isCharacterFragmentCard,
+} from '../../services/collectibleService.js'
+import { getUserMemoryCount } from '../../services/memoryService.js'
 import { getActiveCharacterStoryFragments } from '../../services/storyFragmentService.js'
 import './CharacterStoryPage.css'
 
 function CharacterStoryPage() {
   const { characterId } = useParams()
-  const { profile, user } = useAuth()
+  const { user } = useAuth()
+  const [character, setCharacter] = useState(null)
+  const [notFound, setNotFound] = useState(false)
   const [characterCards, setCharacterCards] = useState([])
   const [storyFragments, setStoryFragments] = useState([])
+  const [memoryCount, setMemoryCount] = useState(0)
   const [failedImageUrls, setFailedImageUrls] = useState([])
-  const character = getArchiveCharacterById(characterId)
-  const firstCharacterId = getFirstArchiveCharacterId({ profile, userId: user?.id })
-  const isFirstCard = firstCharacterId === character?.id
+  const [loading, setLoading] = useState(true)
+  const hasCharacterCard = characterCards.some(
+    (card) =>
+      card.character_id === character?.id &&
+      card.unlocked &&
+      isCharacterFragmentCard(card),
+  )
   const imageSources = useMemo(
     () =>
       getCharacterCardImageSources({
         cards: characterCards,
-        character,
+        character: hasCharacterCard
+          ? character
+          : character
+            ? { ...character, cardImageUrl: '', imageUrl: '' }
+            : character,
         useThumbnail: false,
       }),
-    [character, characterCards],
+    [character, characterCards, hasCharacterCard],
   )
   const characterImageUrl = imageSources.find(
     (imageSource) => !failedImageUrls.includes(imageSource),
-  )
-  const hasPremiumFragment = characterCards.some(
-    (card) =>
-      card.character_id === character?.id &&
-      card.unlocked &&
-      ['character_story', 'monthly_premium'].includes(card.card_type),
   )
   const fragments = useMemo(
     () =>
       getCharacterFragments({
         character,
-        firstCharacterId: firstCharacterId,
+        hasCharacterCard,
         fragments: storyFragments,
-        hasPremiumFragment,
+        memoryCount,
       }),
-    [character, firstCharacterId, hasPremiumFragment, storyFragments],
+    [character, hasCharacterCard, memoryCount, storyFragments],
   )
 
   useEffect(() => {
@@ -61,23 +68,43 @@ function CharacterStoryPage() {
 
     const loadCharacterCards = async () => {
       if (!user?.id) {
+        if (!cancelled) {
+          setLoading(false)
+        }
         return
       }
 
       try {
-        const [nextCards, nextStoryFragments] = await Promise.all([
+        const [
+          nextCards,
+          nextCharacter,
+          nextStoryFragments,
+          nextMemoryCount,
+        ] = await Promise.all([
           getUserCollectibleCards(user.id),
+          getCharacterById(characterId),
           getActiveCharacterStoryFragments(),
+          getUserMemoryCount(user.id),
         ])
 
         if (!cancelled) {
           setCharacterCards(nextCards)
+          setCharacter(nextCharacter)
           setStoryFragments(nextStoryFragments)
+          setMemoryCount(nextMemoryCount)
+          setNotFound(!nextCharacter)
         }
       } catch {
         if (!cancelled) {
+          setCharacter(null)
           setCharacterCards([])
           setStoryFragments([])
+          setMemoryCount(0)
+          setNotFound(true)
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
         }
       }
     }
@@ -87,9 +114,13 @@ function CharacterStoryPage() {
     return () => {
       cancelled = true
     }
-  }, [user])
+  }, [characterId, user])
 
-  if (!character) {
+  if (loading) {
+    return <LoadingState label="Loading character fragments" />
+  }
+
+  if (notFound || !character) {
     return (
       <div className="page-shell">
         <EmptyState
@@ -103,7 +134,7 @@ function CharacterStoryPage() {
   }
 
   return (
-    <div className={`page-shell character-story-page character-story-page--${character.id}`}>
+    <div className={`page-shell content-container character-story-page character-story-page--${character.id}`}>
       <section className="character-story-page__hero glass-panel">
         <div
           className={`character-story-page__portrait ${
@@ -130,16 +161,33 @@ function CharacterStoryPage() {
           )}
         </div>
         <div className="character-story-page__content">
-          <p className="section-kicker">Archive Zero Character</p>
+          <p className="section-kicker">
+            {hasCharacterCard
+              ? 'Premium Character Fragment'
+              : 'Locked Character Fragment'}
+          </p>
           <h1>{character.name}</h1>
           <strong>{character.fullTitle}</strong>
-          {isFirstCard && (
+          {hasCharacterCard ? (
             <span className="character-story-page__chosen-label">
-              Your chosen Archive card
+              Premium Character Fragment unlocked
+            </span>
+          ) : (
+            <span className="character-story-page__chosen-label">
+              Locked
             </span>
           )}
-          <blockquote>{character.quote}</blockquote>
-          <p>{character.storyPreview}</p>
+          {hasCharacterCard ? (
+            <>
+              <blockquote>{character.quote}</blockquote>
+              <p>{character.storyPreview}</p>
+            </>
+          ) : (
+            <p>
+              This story is sealed until you unlock this character card from
+              the Collectibles draw.
+            </p>
+          )}
           <div className="character-story-page__tags">
             <span>{character.gender}</span>
             <span>{character.role}</span>
@@ -151,29 +199,34 @@ function CharacterStoryPage() {
             <Button to="/collectibles" variant="secondary">
               Back to Collectibles
             </Button>
-            <ShareButton
-              text={createCharacterShareText(character)}
-              title={`${character.name} - ${character.fullTitle}`}
-              variant="bright"
-            >
-              Share Card
-            </ShareButton>
+            {hasCharacterCard && (
+              <ShareButton
+                text={createCharacterShareText(character)}
+                title={`${character.name} - ${character.fullTitle}`}
+                variant="bright"
+              >
+                Share Card
+              </ShareButton>
+            )}
           </div>
         </div>
       </section>
 
-      <section className="character-story-page__meaning glass-panel">
-        <p className="section-kicker">Emotional Meaning</p>
-        <p>{character.emotionalMeaning}</p>
-      </section>
+      {hasCharacterCard && (
+        <section className="character-story-page__meaning glass-panel">
+          <p className="section-kicker">Emotional Meaning</p>
+          <p>{character.emotionalMeaning}</p>
+        </section>
+      )}
 
       <section className="character-story-page__fragments">
         <div className="section-heading">
           <p className="section-kicker">Story Fragments</p>
           <h2>Fragments from Archive Zero</h2>
           <p>
-            The first fragment is open to everyone. Your chosen Archive card
-            reveals one more piece of its history.
+            {hasCharacterCard
+              ? 'Fragments open one at a time as your memory archive grows.'
+              : 'Unlock this Premium Character Fragment card to begin revealing its story.'}
           </p>
         </div>
         <div className="grid grid--3">
@@ -181,7 +234,11 @@ function CharacterStoryPage() {
             <StoryFragmentCard
               key={fragment.id}
               locked={!fragment.isUnlocked}
-              title={fragment.isUnlocked ? fragment.title : 'Locked Fragment'}
+              title={
+                fragment.isUnlocked
+                  ? fragment.title
+                  : `Fragment ${fragment.fragmentOrder}`
+              }
             >
               {fragment.isUnlocked ? fragment.content : fragment.lockedContent}
             </StoryFragmentCard>

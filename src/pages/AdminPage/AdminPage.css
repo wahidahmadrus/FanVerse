@@ -137,6 +137,62 @@
   grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
 }
 
+.admin-page__user-list {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.admin-page__user-row {
+  align-items: center;
+  background: rgba(255, 253, 249, 0.88);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns:
+    minmax(12rem, 1.2fr)
+    minmax(10rem, 1fr)
+    minmax(7rem, 0.48fr)
+    minmax(8rem, 0.55fr)
+    auto;
+  padding: var(--space-3);
+}
+
+.admin-page__user-row strong,
+.admin-page__user-row span {
+  display: block;
+  min-width: 0;
+}
+
+.admin-page__user-row strong,
+.admin-page__user-row > div > span:first-child {
+  color: var(--color-white);
+  font-weight: 900;
+}
+
+.admin-page__user-row span {
+  color: var(--color-muted);
+  font-size: 0.84rem;
+  overflow-wrap: anywhere;
+}
+
+.admin-page__user-identity span {
+  margin-top: 0.15rem;
+}
+
+.admin-page__user-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.admin-page__safe-delete-note {
+  color: var(--color-muted);
+  font-size: 0.88rem;
+  margin: 0;
+}
+
 .admin-page__badge-form {
   display: grid;
   gap: var(--space-4);
@@ -264,7 +320,9 @@
   z-index: 50;
 }
 
-.admin-page__memory-modal {
+.admin-page__memory-modal,
+.admin-page__user-modal,
+.admin-page__delete-modal {
   background: var(--gradient-paper);
   border: 1px solid var(--color-border-bright);
   border-radius: var(--radius-xl);
@@ -280,17 +338,25 @@
 }
 
 .admin-page__memory-modal h2,
-.admin-page__memory-modal p {
+.admin-page__memory-modal p,
+.admin-page__user-modal h2,
+.admin-page__user-modal p,
+.admin-page__delete-modal h2,
+.admin-page__delete-modal p {
   margin: 0;
 }
 
-.admin-page__memory-modal h2 {
+.admin-page__memory-modal h2,
+.admin-page__user-modal h2,
+.admin-page__delete-modal h2 {
   color: var(--color-white);
   font-size: clamp(1.6rem, 5vw, 2.6rem);
   line-height: 1.05;
 }
 
-.admin-page__memory-modal p {
+.admin-page__memory-modal p,
+.admin-page__user-modal p,
+.admin-page__delete-modal p {
   color: var(--color-muted);
 }
 
@@ -306,14 +372,16 @@
   padding: 0.48rem 0.85rem;
 }
 
-.admin-page__memory-details {
+.admin-page__memory-details,
+.admin-page__user-stats {
   display: grid;
   gap: var(--space-3);
   grid-template-columns: repeat(2, minmax(0, 1fr));
   margin: 0;
 }
 
-.admin-page__memory-details div {
+.admin-page__memory-details div,
+.admin-page__user-stats div {
   background: rgba(255, 255, 255, 0.58);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -321,14 +389,16 @@
   padding: var(--space-3);
 }
 
-.admin-page__memory-details dt {
+.admin-page__memory-details dt,
+.admin-page__user-stats dt {
   color: var(--color-purple);
   font-size: 0.75rem;
   font-weight: 900;
   text-transform: uppercase;
 }
 
-.admin-page__memory-details dd {
+.admin-page__memory-details dd,
+.admin-page__user-stats dd {
   color: var(--color-muted);
   margin: 0;
 }
@@ -350,6 +420,80 @@
   width: 100%;
 }
 
+.admin-page__user-form {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-page__user-form label {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.admin-page__user-form label span {
+  color: var(--color-muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.admin-page__user-form--wide {
+  grid-column: 1 / -1;
+}
+
+.admin-page__danger-zone {
+  align-items: center;
+  background: rgba(194, 56, 76, 0.1);
+  border: 1px solid rgba(194, 56, 76, 0.34);
+  border-radius: var(--radius-lg);
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: var(--space-4);
+}
+
+.admin-page__danger-zone h3 {
+  color: #9f1f37;
+  font-size: 1rem;
+  margin: 0 0 0.35rem;
+}
+
+.admin-page__danger-zone p,
+.admin-page__delete-confirm span {
+  color: var(--color-muted);
+  font-size: 0.88rem;
+}
+
+.admin-page .admin-page__danger-button {
+  background: #c2384c;
+  border-color: #9f1f37;
+  color: #fff;
+}
+
+.admin-page .admin-page__danger-button:hover {
+  background: #9f1f37;
+  color: #fff;
+}
+
+.admin-page__delete-modal {
+  max-width: 36rem;
+  width: min(100%, 36rem);
+}
+
+.admin-page__delete-warning {
+  background: rgba(194, 56, 76, 0.1);
+  border: 1px solid rgba(194, 56, 76, 0.28);
+  border-radius: var(--radius-md);
+  margin-top: var(--space-3) !important;
+  padding: var(--space-3);
+}
+
+.admin-page__delete-confirm {
+  display: grid;
+  gap: var(--space-2);
+}
+
 .admin-page .button {
   min-height: 2.45rem;
   padding: 0.55rem 0.78rem;
@@ -357,7 +501,8 @@
 
 @media (max-width: 820px) {
   .admin-page__header,
-  .admin-page__row {
+  .admin-page__row,
+  .admin-page__user-row {
     align-items: start;
     grid-template-columns: 1fr;
   }
@@ -370,8 +515,15 @@
   .admin-page__profile-controls,
   .admin-page__badge-grid,
   .admin-page__badge-help-grid,
-  .admin-page__memory-details {
+  .admin-page__memory-details,
+  .admin-page__user-stats,
+  .admin-page__user-form,
+  .admin-page__danger-zone {
     grid-template-columns: 1fr;
+  }
+
+  .admin-page__user-actions {
+    justify-content: flex-start;
   }
 }
 
@@ -400,7 +552,9 @@
 
   .admin-page__memory-row,
   .admin-page__badge-help,
-  .admin-page__memory-modal {
+  .admin-page__memory-modal,
+  .admin-page__user-modal,
+  .admin-page__delete-modal {
     padding: var(--space-3);
   }
 
@@ -411,7 +565,8 @@
   }
 
   .admin-page__memory-actions .button,
-  .admin-page__memory-actions select {
+  .admin-page__memory-actions select,
+  .admin-page__user-actions .button {
     flex: 1 1 100%;
   }
 }

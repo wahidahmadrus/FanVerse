@@ -24,6 +24,66 @@
   margin-bottom: var(--space-6);
 }
 
+.dashboard-page__fandom-card {
+  align-items: center;
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  margin-bottom: var(--space-5);
+  padding: var(--space-5);
+}
+
+.dashboard-page__fandom-avatar {
+  align-items: center;
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, #f8d7ef, #dcefff);
+  border: 2px solid rgba(255, 255, 255, 0.78);
+  border-radius: 50%;
+  color: var(--color-purple);
+  display: flex;
+  font-weight: 900;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.dashboard-page__fandom-avatar img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.dashboard-page__fandom-card h2,
+.dashboard-page__fandom-card p {
+  margin: 0;
+}
+
+.dashboard-page__fandom-card h2 {
+  color: var(--color-white);
+  font-size: clamp(1.45rem, 3vw, 2rem);
+}
+
+.dashboard-page__fandom-card p:not(.section-kicker) {
+  color: var(--color-muted);
+  margin-top: var(--space-2);
+}
+
+.dashboard-page__fandom-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.dashboard-page__fandom-meta span {
+  background: #f6edff;
+  border: 1px solid rgba(141, 101, 216, 0.14);
+  border-radius: var(--radius-pill);
+  color: var(--color-purple);
+  font-size: 0.8rem;
+  font-weight: 900;
+  padding: 0.34rem 0.62rem;
+}
+
 .dashboard-page__content {
   align-items: start;
   display: grid;
@@ -45,6 +105,10 @@
   margin: 0;
 }
 
+.dashboard-page__section-title--spaced {
+  margin-top: var(--space-6);
+}
+
 .dashboard-page__memory-list {
   display: grid;
   gap: var(--space-3);
@@ -60,6 +124,25 @@
   gap: var(--space-2);
   padding: var(--space-5);
   position: relative;
+}
+
+.dashboard-page__quiet {
+  padding: var(--space-5);
+}
+
+.dashboard-page__quiet h2,
+.dashboard-page__quiet p {
+  margin: 0;
+}
+
+.dashboard-page__quiet h2 {
+  color: var(--color-white);
+  font-size: 1.15rem;
+}
+
+.dashboard-page__quiet p {
+  color: var(--color-muted);
+  margin-top: var(--space-2);
 }
 
 .dashboard-page__reward::after {
@@ -98,9 +181,14 @@
 
 @media (max-width: 900px) {
   .dashboard-page__hero,
-  .dashboard-page__content {
+  .dashboard-page__content,
+  .dashboard-page__fandom-card {
     align-items: start;
     grid-template-columns: 1fr;
+  }
+
+  .dashboard-page__fandom-avatar {
+    width: 5rem;
   }
 }
 

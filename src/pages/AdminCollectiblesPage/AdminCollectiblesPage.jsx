@@ -2,7 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Button from '../../components/Button/Button.jsx'
 import FormMessage from '../../components/FormMessage/FormMessage.jsx'
 import LoadingState from '../../components/LoadingState/LoadingState.jsx'
-import { archiveCharacters, getArchiveCharacterById } from '../../data/archiveCharacters.js'
+import {
+  getAdminCharacters,
+  getCharacterName,
+} from '../../services/characterService.js'
 import {
   createCollectibleCard,
   deleteCollectibleCard,
@@ -22,11 +25,11 @@ const activeFilters = ['All', 'Active', 'Inactive']
 const cardTypeOptions = [
   { label: 'Normal Reward', value: 'normal_reward' },
   { label: 'Achievement', value: 'achievement' },
-  { label: 'Character Story', value: 'character_story' },
-  { label: 'Monthly Premium', value: 'monthly_premium' },
+  { label: 'Premium Character Fragment', value: 'character_story' },
+  { label: 'Premium Character Fragment (Monthly)', value: 'monthly_premium' },
 ]
 const conditionOptions = [
-  'first_archive_card',
+  'archive_draw',
   'first_memory',
   'total_memories',
   'total_stars',
@@ -110,6 +113,7 @@ function AdminCollectiblePreview({ card }) {
 
 function AdminCollectiblesPage() {
   const [cards, setCards] = useState([])
+  const [characters, setCharacters] = useState([])
   const [formData, setFormData] = useState(emptyForm)
   const [editingId, setEditingId] = useState('')
   const [search, setSearch] = useState('')
@@ -129,10 +133,14 @@ function AdminCollectiblesPage() {
 
     const loadInitialCards = async () => {
       try {
-        const cardRows = await getAdminCollectibleCards()
+        const [cardRows, characterRows] = await Promise.all([
+          getAdminCollectibleCards(),
+          getAdminCharacters(),
+        ])
 
         if (!cancelled) {
           setCards(cardRows)
+          setCharacters(characterRows)
         }
       } catch (loadError) {
         if (!cancelled) {
@@ -152,6 +160,27 @@ function AdminCollectiblesPage() {
     }
   }, [])
 
+  const charactersById = useMemo(
+    () => new Map(characters.map((character) => [character.id, character])),
+    [characters],
+  )
+  const activeCharacters = useMemo(
+    () => characters.filter((character) => character.is_active !== false),
+    [characters],
+  )
+  const characterOptions = useMemo(() => {
+    const selectedCharacter = charactersById.get(formData.character_id)
+
+    if (
+      !selectedCharacter ||
+      activeCharacters.some((character) => character.id === selectedCharacter.id)
+    ) {
+      return activeCharacters
+    }
+
+    return [selectedCharacter, ...activeCharacters]
+  }, [activeCharacters, charactersById, formData.character_id])
+
   const filteredCards = useMemo(() => {
     const query = search.trim().toLowerCase()
 
@@ -166,7 +195,8 @@ function AdminCollectiblesPage() {
           card.card_type,
           card.character_id,
           card.story_fragment,
-          getArchiveCharacterById(card.character_id)?.name,
+          charactersById.get(card.character_id)?.name,
+          charactersById.get(card.character_id)?.title,
         ]
           .join(' ')
           .toLowerCase()
@@ -182,7 +212,14 @@ function AdminCollectiblesPage() {
 
       return searchMatches && rarityMatches && cardTypeMatches && activeMatches
     })
-  }, [cards, search, selectedActive, selectedCardType, selectedRarity])
+  }, [
+    cards,
+    charactersById,
+    search,
+    selectedActive,
+    selectedCardType,
+    selectedRarity,
+  ])
 
   const handleChange = (event) => {
     const { checked, name, type, value } = event.target
@@ -339,7 +376,7 @@ function AdminCollectiblesPage() {
   }
 
   return (
-    <div className="page-shell admin-collectibles-page">
+    <div className="page-shell wide-container admin-collectibles-page">
       <section className="section-heading">
         <p className="section-kicker">Admin</p>
         <h1>Manage Collectible Cards</h1>
@@ -408,12 +445,20 @@ function AdminCollectiblesPage() {
                 value={formData.character_id}
               >
                 <option value="">None</option>
-                {archiveCharacters.map((character) => (
+                {characterOptions.map((character) => (
                   <option key={character.id} value={character.id}>
                     {character.name}
                   </option>
                 ))}
               </select>
+              {activeCharacters.length === 0 && (
+                <small className="admin-collectibles-page__field-note">
+                  No characters found. Create a character first.
+                  <Button to="/admin/characters" variant="ghost">
+                    Create Character
+                  </Button>
+                </small>
+              )}
             </label>
             <label>
               <span>Condition value</span>
@@ -551,7 +596,7 @@ function AdminCollectiblesPage() {
                   <h3>{card.title}</h3>
                   <p className="admin-collectibles-page__item-meta">
                     {card.rarity} / {(card.card_type || 'normal_reward').replaceAll('_', ' ')} /{' '}
-                    {getArchiveCharacterById(card.character_id)?.name || 'No character'} /{' '}
+                    {getCharacterName(characters, card.character_id)} /{' '}
                     {card.is_active ? 'Active' : 'Inactive'}
                   </p>
                   <p>{card.description}</p>

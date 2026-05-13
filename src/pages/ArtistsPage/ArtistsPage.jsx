@@ -47,7 +47,7 @@ function ArtistsPage() {
   }
 
   return (
-    <div className="page-shell artists-page">
+    <div className="page-shell wide-container artists-page">
       <section className="artists-page__header">
         <div className="section-heading">
           <p className="section-kicker">Artists</p>

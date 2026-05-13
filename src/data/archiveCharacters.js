@@ -3,8 +3,7 @@ import onCardImage from '../assets/images/characters/optimized/on.webp'
 import uanCardImage from '../assets/images/characters/optimized/uan.webp'
 import yalCardImage from '../assets/images/characters/optimized/yal.webp'
 
-const lockedFragmentText =
-  'Unlock more character fragments to reveal this part of the story.'
+const fallbackMemoryRequirements = [0, 3, 7, 15]
 
 export const archiveCharacters = [
   {
@@ -29,28 +28,39 @@ export const archiveCharacters = [
     coverImageUrl: '',
     collectibleCardId: '',
     themeColor: 'purple-blue',
-    rarityType: 'Premium Monthly',
+    rarityType: 'Premium Character Fragment',
     fragments: [
       {
-        id: 'fragment-1',
+        id: 'en-fragment-1',
         title: 'Beginning',
-        unlockLevel: 'default',
+        fragment_order: 1,
+        required_memories: 0,
         content:
           'The first signal En saved was barely visible: one late-night post, one tiny translation, and one fan memory almost lost to time.',
       },
       {
-        id: 'fragment-2',
-        title: 'First Choice',
-        unlockLevel: 'chosen_character',
+        id: 'en-fragment-2',
+        title: 'Silent Signal',
+        fragment_order: 2,
+        required_memories: 3,
         content:
           'When Archive Zero dimmed, En rebuilt the path between scattered memories so distant support could still reach the person it was meant for.',
       },
       {
-        id: 'fragment-3',
-        title: 'Hidden Chapter',
-        unlockLevel: 'locked',
+        id: 'en-fragment-3',
+        title: 'Hidden Channel',
+        fragment_order: 3,
+        required_memories: 7,
         content:
-          'The next En fragment is sealed inside a premium character card.',
+          'En learned to stitch together the smallest proofs of care until quiet support became a map no distance could erase.',
+      },
+      {
+        id: 'en-fragment-4',
+        title: 'Far Light',
+        fragment_order: 4,
+        required_memories: 15,
+        content:
+          'By the time the far light returned, En understood that unseen love could still leave a permanent signal in the archive.',
       },
     ],
   },
@@ -75,28 +85,39 @@ export const archiveCharacters = [
     coverImageUrl: '',
     collectibleCardId: '',
     themeColor: 'pink-lavender',
-    rarityType: 'Premium Monthly',
+    rarityType: 'Premium Character Fragment',
     fragments: [
       {
-        id: 'fragment-1',
+        id: 'uan-fragment-1',
         title: 'Beginning',
-        unlockLevel: 'default',
+        fragment_order: 1,
+        required_memories: 0,
         content:
           'Uan found a hidden pattern in the archive: every saved detail glowed brighter when it came from a fan who wanted to be understood.',
       },
       {
-        id: 'fragment-2',
-        title: 'First Choice',
-        unlockLevel: 'chosen_character',
+        id: 'uan-fragment-2',
+        title: 'Tiny Details',
+        fragment_order: 2,
+        required_memories: 3,
         content:
           'Uan followed a trail of tiny saved moments and realized every universe she loved was also teaching her how to name her own heart.',
       },
       {
-        id: 'fragment-3',
-        title: 'Hidden Chapter',
-        unlockLevel: 'locked',
+        id: 'uan-fragment-3',
+        title: 'Pattern of Light',
+        fragment_order: 3,
+        required_memories: 7,
         content:
-          'The next Uan fragment is sealed inside a premium character card.',
+          'The more memories Uan archived, the clearer the pattern became: longing was not a mistake, but a signal asking to be understood.',
+      },
+      {
+        id: 'uan-fragment-4',
+        title: 'Endless Heart',
+        fragment_order: 4,
+        required_memories: 15,
+        content:
+          'Uan stopped chasing every spark as destiny and began keeping the ones that helped her feel honest, steady, and real.',
       },
     ],
   },
@@ -122,28 +143,39 @@ export const archiveCharacters = [
     coverImageUrl: '',
     collectibleCardId: '',
     themeColor: 'gold-blue',
-    rarityType: 'Premium Monthly',
+    rarityType: 'Premium Character Fragment',
     fragments: [
       {
-        id: 'fragment-1',
+        id: 'on-fragment-1',
         title: 'Beginning',
-        unlockLevel: 'default',
+        fragment_order: 1,
+        required_memories: 0,
         content:
           'On restored warmth to a tired channel by saving the messages that helped fans remember why they started cheering.',
       },
       {
-        id: 'fragment-2',
-        title: 'First Choice',
-        unlockLevel: 'chosen_character',
+        id: 'on-fragment-2',
+        title: 'Gentle Words',
+        fragment_order: 2,
+        required_memories: 3,
         content:
           'When the fandom split into noise, On archived the gentle words first, proving support could stay strong without becoming sharp.',
       },
       {
-        id: 'fragment-3',
-        title: 'Hidden Chapter',
-        unlockLevel: 'locked',
+        id: 'on-fragment-3',
+        title: 'Steady Pulse',
+        fragment_order: 3,
+        required_memories: 7,
         content:
-          'The next On fragment is sealed inside a premium character card.',
+          'On kept a pulse running through the archive by preserving the moments where fans chose patience over pressure.',
+      },
+      {
+        id: 'on-fragment-4',
+        title: 'Warm Signal',
+        fragment_order: 4,
+        required_memories: 15,
+        content:
+          'The warmest signal On saved was not the loudest cheer, but the quiet proof that care could survive difficult days.',
       },
     ],
   },
@@ -169,28 +201,39 @@ export const archiveCharacters = [
     coverImageUrl: '',
     collectibleCardId: '',
     themeColor: 'violet-rose',
-    rarityType: 'Premium Monthly',
+    rarityType: 'Premium Character Fragment',
     fragments: [
       {
-        id: 'fragment-1',
+        id: 'yal-fragment-1',
         title: 'Beginning',
-        unlockLevel: 'default',
+        fragment_order: 1,
+        required_memories: 0,
         content:
           'Yal entered Archive Zero through a memory that felt too bright to name, then began learning which feelings were hers to keep.',
       },
       {
-        id: 'fragment-2',
-        title: 'First Choice',
-        unlockLevel: 'chosen_character',
+        id: 'yal-fragment-2',
+        title: 'Almost Confession',
+        fragment_order: 2,
+        required_memories: 3,
         content:
           'Yal found a card that reflected every almost-confession back at her, and for the first time she asked what longing was trying to protect.',
       },
       {
-        id: 'fragment-3',
-        title: 'Hidden Chapter',
-        unlockLevel: 'locked',
+        id: 'yal-fragment-3',
+        title: 'Bright Feeling',
+        fragment_order: 3,
+        required_memories: 7,
         content:
-          'The next Yal fragment is sealed inside a premium character card.',
+          'The archive did not ask Yal to feel less. It asked her to save each memory carefully enough to understand what was true.',
+      },
+      {
+        id: 'yal-fragment-4',
+        title: 'More Than Admiration',
+        fragment_order: 4,
+        required_memories: 15,
+        content:
+          'Yal finally saw that wanting more did not have to consume her. It could become a memory, a lesson, and a softer kind of strength.',
       },
     ],
   },
@@ -202,42 +245,63 @@ export const getArchiveCharacterById = (characterId) =>
 export const getArchiveCharacterName = (characterId) =>
   getArchiveCharacterById(characterId)?.name || 'Archive Zero'
 
-export const isCharacterFragmentUnlocked = ({
-  character,
-  firstCharacterId = '',
-  fragment,
-  hasPremiumFragment = false,
-}) => {
-  const unlockLevel = fragment.unlockLevel || fragment.unlock_rule
+const getRequiredMemories = (fragment, index) => {
+  const value = fragment.required_memories ?? fragment.requiredMemories
 
-  if (unlockLevel === 'default') {
-    return true
+  if (value !== undefined && value !== null && value !== '') {
+    return Math.max(0, Number(value) || 0)
   }
 
-  if (unlockLevel === 'chosen_character') {
-    return character.id === firstCharacterId
-  }
-
-  if (unlockLevel === 'premium_fragment') {
-    return hasPremiumFragment
-  }
-
-  return false
+  return fallbackMemoryRequirements[index] ?? Math.max(0, index * 5)
 }
 
-const normalizeFragment = (fragment, index) => ({
-  id: fragment.id || `fragment-${index + 1}`,
-  title: fragment.title || `Fragment ${index + 1}`,
-  unlockLevel: fragment.unlockLevel || fragment.unlock_rule || 'locked',
-  content: fragment.content || '',
-  fragmentOrder: Number(fragment.fragment_order || fragment.fragmentOrder || index + 1),
-})
+const getLockedFragmentText = ({
+  fragment,
+  hasCharacterCard,
+  memoryCount,
+}) => {
+  if (!hasCharacterCard) {
+    return `Unlock this Premium Character Fragment card to reveal Fragment ${fragment.fragmentOrder}.`
+  }
+
+  const remainingMemories = Math.max(
+    0,
+    fragment.requiredMemories - Number(memoryCount || 0),
+  )
+  const memoryWord = remainingMemories === 1 ? 'memory' : 'memories'
+
+  return `Add ${remainingMemories} more ${memoryWord} to reveal this fragment.`
+}
+
+export const isCharacterFragmentUnlocked = ({
+  fragment,
+  hasCharacterCard = false,
+  hasPremiumFragment = false,
+  memoryCount = 0,
+}) =>
+  (hasCharacterCard || hasPremiumFragment) &&
+  Number(memoryCount || 0) >= Number(fragment.requiredMemories || 0)
+
+const normalizeFragment = (fragment, index) => {
+  const fragmentOrder = Number(
+    fragment.fragment_order || fragment.fragmentOrder || index + 1,
+  )
+
+  return {
+    id: fragment.id || `fragment-${index + 1}`,
+    title: fragment.title || `Fragment ${fragmentOrder}`,
+    content: fragment.content || '',
+    fragmentOrder,
+    requiredMemories: getRequiredMemories(fragment, index),
+  }
+}
 
 export const getCharacterFragments = ({
   character,
-  firstCharacterId = '',
   fragments = [],
+  hasCharacterCard = false,
   hasPremiumFragment = false,
+  memoryCount = 0,
 }) => {
   const databaseFragments = fragments
     .filter((fragment) => fragment.character_id === character?.id)
@@ -246,7 +310,9 @@ export const getCharacterFragments = ({
         Number(firstFragment.fragment_order || 0) -
         Number(secondFragment.fragment_order || 0),
     )
-  const sourceFragments = databaseFragments.length > 0 ? databaseFragments : character?.fragments || []
+  const sourceFragments =
+    databaseFragments.length > 0 ? databaseFragments : character?.fragments || []
+  const characterCardUnlocked = hasCharacterCard || hasPremiumFragment
 
   return sourceFragments.map((fragment, index) => {
     const normalizedFragment = normalizeFragment(fragment, index)
@@ -254,18 +320,18 @@ export const getCharacterFragments = ({
     return {
       ...normalizedFragment,
       isUnlocked: isCharacterFragmentUnlocked({
-        character,
-        firstCharacterId,
         fragment: normalizedFragment,
-        hasPremiumFragment,
+        hasCharacterCard: characterCardUnlocked,
+        memoryCount,
       }),
-      lockedContent: lockedFragmentText,
+      lockedContent: getLockedFragmentText({
+        fragment: normalizedFragment,
+        hasCharacterCard: characterCardUnlocked,
+        memoryCount,
+      }),
     }
   })
 }
 
-export const createCharacterShareText = (character) => {
-  const action = character.id === 'en' ? 'I chose' : 'I discovered'
-
-  return `${action} ${character.name} \u2014 ${character.fullTitle} from Archive Zero on FanVerse Archive.`
-}
+export const createCharacterShareText = (character) =>
+  `I unlocked ${character.name} - ${character.fullTitle} from Archive Zero on FanVerse Archive.`

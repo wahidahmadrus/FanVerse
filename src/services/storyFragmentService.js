@@ -20,6 +20,7 @@ export const normalizeStoryFragment = (fragment) => ({
   title: fragment.title || 'Untitled Fragment',
   content: fragment.content || '',
   fragment_order: Number(fragment.fragment_order || 1),
+  required_memories: Math.max(0, Number(fragment.required_memories || 0)),
   unlock_rule: fragment.unlock_rule || 'locked',
   is_active: fragment.is_active !== false,
 })

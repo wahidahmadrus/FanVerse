@@ -1,0 +1,162 @@
+.fandom-artist-selector {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.fandom-artist-selector label {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.fandom-artist-selector label span {
+  color: var(--color-muted);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.fandom-artist-selector input,
+.fandom-artist-selector textarea {
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  outline: none;
+  padding: 0.86rem 1rem;
+  width: 100%;
+}
+
+.fandom-artist-selector textarea {
+  resize: vertical;
+}
+
+.fandom-artist-selector input:focus,
+.fandom-artist-selector textarea:focus {
+  background: rgba(255, 255, 255, 0.94);
+  border-color: rgba(141, 101, 216, 0.48);
+  box-shadow: 0 0 0 4px rgba(141, 101, 216, 0.12);
+}
+
+.fandom-artist-selector__hint {
+  color: var(--color-muted);
+  font-size: 0.86rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.fandom-artist-selector__selected,
+.fandom-artist-selector__create {
+  background: rgba(255, 253, 249, 0.72);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+}
+
+.fandom-artist-selector__selected span,
+.fandom-artist-selector__selected small,
+.fandom-artist-selector__create p {
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.fandom-artist-selector__selected strong {
+  color: var(--color-white);
+}
+
+.fandom-artist-selector__suggestions {
+  background: rgba(255, 253, 249, 0.96);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  display: grid;
+  gap: var(--space-2);
+  max-height: 18rem;
+  overflow-y: auto;
+  padding: var(--space-2);
+}
+
+.fandom-artist-selector__suggestions button {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  cursor: pointer;
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+  padding: var(--space-2);
+  text-align: left;
+}
+
+.fandom-artist-selector__suggestions button:hover,
+.fandom-artist-selector__suggestions button:focus-visible {
+  background: #f6edff;
+  border-color: rgba(141, 101, 216, 0.18);
+  outline: none;
+}
+
+.fandom-artist-selector__suggestions strong,
+.fandom-artist-selector__suggestions small {
+  display: block;
+}
+
+.fandom-artist-selector__suggestions small {
+  color: var(--color-muted);
+}
+
+.fandom-artist-selector__suggestions em {
+  background: #f6edff;
+  border-radius: var(--radius-pill);
+  color: var(--color-purple);
+  font-size: 0.76rem;
+  font-style: normal;
+  font-weight: 900;
+  padding: 0.3rem 0.56rem;
+  white-space: nowrap;
+}
+
+.fandom-artist-selector__avatar {
+  align-items: center;
+  background: linear-gradient(135deg, #f8d7ef, #dcefff);
+  border-radius: 50%;
+  color: var(--color-purple);
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 900;
+  height: 2.5rem;
+  justify-content: center;
+  overflow: hidden;
+  width: 2.5rem;
+}
+
+.fandom-artist-selector__avatar img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.fandom-artist-selector__create-fields {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.fandom-artist-selector__image-preview {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  max-height: 10rem;
+  object-fit: cover;
+  width: 100%;
+}
+
+@media (max-width: 520px) {
+  .fandom-artist-selector__suggestions button {
+    grid-template-columns: 2.35rem minmax(0, 1fr);
+  }
+
+  .fandom-artist-selector__suggestions em {
+    justify-self: start;
+    grid-column: 2;
+  }
+}

@@ -3,7 +3,6 @@ import Button from '../../components/Button/Button.jsx'
 import EmptyState from '../../components/EmptyState/EmptyState.jsx'
 import FormMessage from '../../components/FormMessage/FormMessage.jsx'
 import LoadingState from '../../components/LoadingState/LoadingState.jsx'
-import Timeline from '../../components/Timeline/Timeline.jsx'
 import { useAuth } from '../../context/useAuth.js'
 import { activityTypes } from '../../data/memories.js'
 import { deleteMemory, getUserMemories } from '../../services/memoryService.js'
@@ -17,6 +16,147 @@ const sortOptions = [
   { label: 'Highest Stars', value: 'stars' },
 ]
 
+const formatDate = (date) =>
+  new Intl.DateTimeFormat('en', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(new Date(`${date}T00:00:00`))
+
+const getDateKey = (memory) => memory.memory_date || memory.date || 'undated'
+
+const getPreview = (text = '') => {
+  const normalizedText = text.replace(/\s+/g, ' ').trim()
+
+  if (normalizedText.length <= 170) {
+    return normalizedText
+  }
+
+  return `${normalizedText.slice(0, 170).trim()}...`
+}
+
+function DiaryEntryCard({ deletingId, memory, onDelete, onOpen }) {
+  const activityType = memory.activity_type || memory.type || 'Memory'
+  const memoryDate = memory.memory_date || memory.date
+  const hasProof = memory.has_proof || Boolean(memory.proof_image_url)
+  const stars = memory.final_stars || memory.finalStars || memory.stars || 0
+
+  return (
+    <article
+      className="my-archive-page__entry"
+      onClick={() => onOpen(memory)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter') {
+          onOpen(memory)
+        }
+      }}
+      role="button"
+      tabIndex="0"
+    >
+      <div className="my-archive-page__entry-main">
+        <div className="my-archive-page__entry-topline">
+          <span>{activityType}</span>
+          <span>{hasProof ? 'Proof Added' : 'Memory Only'}</span>
+          <span>{memory.visibility === 'public' ? 'Public' : 'Private'}</span>
+        </div>
+        <h3>{memory.title}</h3>
+        <p>{getPreview(memory.description)}</p>
+      </div>
+      <div className="my-archive-page__entry-meta">
+        {memoryDate && <span>{formatDate(memoryDate)}</span>}
+        <span>{memory.mood}</span>
+        <strong>{stars} stars</strong>
+      </div>
+      <div
+        className="my-archive-page__entry-actions"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <Button to={`/memories/${memory.id}/edit`} variant="secondary">
+          Edit
+        </Button>
+        <Button
+          disabled={deletingId === memory.id}
+          onClick={() => onDelete(memory)}
+          type="button"
+          variant="ghost"
+        >
+          {deletingId === memory.id ? 'Removing...' : 'Remove'}
+        </Button>
+      </div>
+    </article>
+  )
+}
+
+function DiaryDetailModal({ memory, onClose }) {
+  if (!memory) {
+    return null
+  }
+
+  const artistName = memory.artistName || memory.artist?.name || 'Unknown fandom'
+  const activityType = memory.activity_type || memory.type || 'Memory'
+  const proofImage = memory.proof_image_url || memory.proofImageUrl
+  const hasProof = memory.has_proof || Boolean(proofImage)
+  const baseStars = memory.base_stars || memory.baseStars || memory.stars || 0
+  const finalStars = memory.final_stars || memory.finalStars || memory.stars || 0
+
+  return (
+    <div className="my-archive-page__modal-overlay" onMouseDown={onClose} role="presentation">
+      <section
+        aria-labelledby={`diary-entry-${memory.id}`}
+        aria-modal="true"
+        className="my-archive-page__modal"
+        onMouseDown={(event) => event.stopPropagation()}
+        role="dialog"
+      >
+        <button className="my-archive-page__modal-close" onClick={onClose} type="button">
+          Close
+        </button>
+        <div>
+          <p className="section-kicker">Diary Entry</p>
+          <h2 id={`diary-entry-${memory.id}`}>{memory.title}</h2>
+          <div className="my-archive-page__modal-tags">
+            <span>{artistName}</span>
+            <span>{activityType}</span>
+            <span>{memory.mood}</span>
+            <span>{memory.visibility === 'public' ? 'Public' : 'Private'}</span>
+            <span>{hasProof ? 'Proof Added' : 'Memory Only'}</span>
+          </div>
+        </div>
+        <p className="my-archive-page__modal-text">{memory.description}</p>
+        {proofImage && (
+          <img
+            alt={`${memory.title} proof`}
+            className="my-archive-page__modal-proof"
+            src={proofImage}
+          />
+        )}
+        <dl className="my-archive-page__modal-reward">
+          <div>
+            <dt>Date</dt>
+            <dd>{formatDate(memory.memory_date || memory.date)}</dd>
+          </div>
+          <div>
+            <dt>Base reward</dt>
+            <dd>{baseStars} stars</dd>
+          </div>
+          <div>
+            <dt>Final reward</dt>
+            <dd>{finalStars} stars</dd>
+          </div>
+        </dl>
+        <div className="actions">
+          <Button to={`/memories/${memory.id}/edit`} variant="secondary">
+            Edit Entry
+          </Button>
+          <Button onClick={onClose} type="button" variant="ghost">
+            Back to Archive
+          </Button>
+        </div>
+      </section>
+    </div>
+  )
+}
+
 function MyArchivePage() {
   const { user } = useAuth()
   const [memories, setMemories] = useState([])
@@ -25,6 +165,7 @@ function MyArchivePage() {
   const [selectedVisibility, setSelectedVisibility] = useState('All')
   const [selectedProof, setSelectedProof] = useState('All')
   const [selectedSort, setSelectedSort] = useState('newest')
+  const [selectedMemory, setSelectedMemory] = useState(null)
   const [deletingId, setDeletingId] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -85,6 +226,22 @@ function MyArchivePage() {
     })
   }, [memories, search, selectedProof, selectedSort, selectedType, selectedVisibility])
 
+  const groupedMemories = useMemo(() => {
+    const groups = new Map()
+
+    filteredMemories.forEach((memory) => {
+      const dateKey = getDateKey(memory)
+      const existingGroup = groups.get(dateKey) || []
+      groups.set(dateKey, [...existingGroup, memory])
+    })
+
+    return Array.from(groups.entries()).map(([dateKey, groupMemories]) => ({
+      dateKey,
+      label: dateKey === 'undated' ? 'Undated Memories' : formatDate(dateKey),
+      memories: groupMemories,
+    }))
+  }, [filteredMemories])
+
   const handleDeleteMemory = async (memory) => {
     const shouldDelete = window.confirm(
       `Remove "${memory.title}" from your archive? This cannot be undone.`,
@@ -102,6 +259,9 @@ function MyArchivePage() {
       setMemories((currentMemories) =>
         currentMemories.filter((currentMemory) => currentMemory.id !== memory.id),
       )
+      if (selectedMemory?.id === memory.id) {
+        setSelectedMemory(null)
+      }
       setMessage('The memory was removed from your archive.')
     } catch (deleteError) {
       setError(deleteError.message)
@@ -111,21 +271,21 @@ function MyArchivePage() {
   }
 
   if (loading) {
-    return <LoadingState label="Opening your personal archive" />
+    return <LoadingState label="Opening your fan diary" />
   }
 
   return (
-    <div className="page-shell my-archive-page">
+    <div className="page-shell wide-container my-archive-page">
       <section className="my-archive-page__header">
         <div className="section-heading">
           <p className="section-kicker">My Archive</p>
-          <h1>Your Memory Timeline</h1>
+          <h1>Your Fan Diary</h1>
           <p>
-            This is your personal fan archive. Public posts and private memories
-            both live here, organized by artist and activity.
+            Public entries and private memories live here as your personal fan
+            archive.
           </p>
         </div>
-        <Button to="/add-memory">Add Memory</Button>
+        <Button to="/add-memory">Write a Fan Memory</Button>
       </section>
 
       <FormMessage type="error">{error}</FormMessage>
@@ -135,7 +295,7 @@ function MyArchivePage() {
         <div className="my-archive-page__search-row">
           <input
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search title, artist, mood, activity..."
+            placeholder="Search title, fandom, mood, activity..."
             type="search"
             value={search}
           />
@@ -201,33 +361,44 @@ function MyArchivePage() {
       </section>
 
       {memories.length > 0 ? (
-        <Timeline
-          compact
-          memories={filteredMemories}
-          renderActions={(memory) => (
-            <>
-              <Button to={`/memories/${memory.id}/edit`} variant="secondary">
-                Edit
-              </Button>
-              <Button
-                disabled={deletingId === memory.id}
-                onClick={() => handleDeleteMemory(memory)}
-                type="button"
-                variant="ghost"
-              >
-                {deletingId === memory.id ? 'Removing...' : 'Remove'}
-              </Button>
-            </>
-          )}
-        />
+        groupedMemories.length > 0 ? (
+          <section className="my-archive-page__diary" aria-label="Diary entries">
+            {groupedMemories.map((group) => (
+              <div className="my-archive-page__date-group" key={group.dateKey}>
+                <h2>{group.label}</h2>
+                <div className="my-archive-page__entries">
+                  {group.memories.map((memory) => (
+                    <DiaryEntryCard
+                      deletingId={deletingId}
+                      key={memory.id}
+                      memory={memory}
+                      onDelete={handleDeleteMemory}
+                      onOpen={setSelectedMemory}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </section>
+        ) : (
+          <EmptyState
+            description="No entries match this view yet."
+            title="No matching memories"
+          />
+        )
       ) : (
         <EmptyState
-          actionLabel="Add Memory"
+          actionLabel="Write a Fan Memory"
           actionTo="/add-memory"
           description="Start with one concert, stream, fan event, artwork, or personal moment."
           title="Your archive is ready for its first memory"
         />
       )}
+
+      <DiaryDetailModal
+        memory={selectedMemory}
+        onClose={() => setSelectedMemory(null)}
+      />
     </div>
   )
 }

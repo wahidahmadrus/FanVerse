@@ -3,35 +3,40 @@ import Button from '../../components/Button/Button.jsx'
 import EmptyState from '../../components/EmptyState/EmptyState.jsx'
 import FormMessage from '../../components/FormMessage/FormMessage.jsx'
 import LoadingState from '../../components/LoadingState/LoadingState.jsx'
-import { archiveCharacters, getArchiveCharacterById } from '../../data/archiveCharacters.js'
+import {
+  getAdminCharacters,
+  getCharacterName,
+} from '../../services/characterService.js'
 import {
   createCharacterStoryFragment,
   deleteCharacterStoryFragment,
   getAdminCharacterStoryFragments,
-  unlockRuleOptions,
   updateCharacterStoryFragment,
 } from '../../services/storyFragmentService.js'
 import './AdminStoriesPage.css'
 
-const characterFilters = ['All', ...archiveCharacters.map((character) => character.id)]
-const unlockRuleFilters = ['All', ...unlockRuleOptions.map((option) => option.value)]
-
 const emptyForm = {
-  character_id: 'en',
+  character_id: '',
   title: '',
   content: '',
   fragment_order: '1',
-  unlock_rule: 'default',
+  required_memories: '0',
   is_active: true,
 }
 
+const getEmptyFormForCharacters = (characters = []) => ({
+  ...emptyForm,
+  character_id:
+    characters.find((character) => character.is_active !== false)?.id || '',
+})
+
 function AdminStoriesPage() {
   const [fragments, setFragments] = useState([])
+  const [characters, setCharacters] = useState([])
   const [formData, setFormData] = useState(emptyForm)
   const [editingId, setEditingId] = useState('')
   const [search, setSearch] = useState('')
   const [selectedCharacter, setSelectedCharacter] = useState('All')
-  const [selectedUnlockRule, setSelectedUnlockRule] = useState('All')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -42,7 +47,15 @@ function AdminStoriesPage() {
     try {
       setLoading(true)
       setError('')
-      setFragments(await getAdminCharacterStoryFragments())
+      const [nextFragments, nextCharacters] = await Promise.all([
+        getAdminCharacterStoryFragments(),
+        getAdminCharacters(),
+      ])
+      setFragments(nextFragments)
+      setCharacters(nextCharacters)
+      setFormData((currentData) =>
+        editingId ? currentData : getEmptyFormForCharacters(nextCharacters),
+      )
     } catch (loadError) {
       setError(loadError.message)
     } finally {
@@ -55,10 +68,15 @@ function AdminStoriesPage() {
 
     const loadInitialFragments = async () => {
       try {
-        const nextFragments = await getAdminCharacterStoryFragments()
+        const [nextFragments, nextCharacters] = await Promise.all([
+          getAdminCharacterStoryFragments(),
+          getAdminCharacters(),
+        ])
 
         if (!cancelled) {
           setFragments(nextFragments)
+          setCharacters(nextCharacters)
+          setFormData(getEmptyFormForCharacters(nextCharacters))
           setError('')
         }
       } catch (loadError) {
@@ -79,17 +97,42 @@ function AdminStoriesPage() {
     }
   }, [])
 
+  const charactersById = useMemo(
+    () => new Map(characters.map((character) => [character.id, character])),
+    [characters],
+  )
+  const activeCharacters = useMemo(
+    () => characters.filter((character) => character.is_active !== false),
+    [characters],
+  )
+  const characterOptions = useMemo(() => {
+    const selectedCharacter = charactersById.get(formData.character_id)
+
+    if (
+      !selectedCharacter ||
+      activeCharacters.some((character) => character.id === selectedCharacter.id)
+    ) {
+      return activeCharacters
+    }
+
+    return [selectedCharacter, ...activeCharacters]
+  }, [activeCharacters, charactersById, formData.character_id])
+  const characterFilters = useMemo(
+    () => ['All', ...characters.map((character) => character.id)],
+    [characters],
+  )
+
   const filteredFragments = useMemo(() => {
     const query = search.trim().toLowerCase()
 
     return fragments.filter((fragment) => {
-      const character = getArchiveCharacterById(fragment.character_id)
+      const character = charactersById.get(fragment.character_id)
       const searchMatches =
         !query ||
         [
           fragment.title,
           fragment.content,
-          fragment.unlock_rule,
+          fragment.required_memories,
           character?.name,
           character?.fullTitle,
         ]
@@ -98,12 +141,10 @@ function AdminStoriesPage() {
           .includes(query)
       const characterMatches =
         selectedCharacter === 'All' || fragment.character_id === selectedCharacter
-      const unlockRuleMatches =
-        selectedUnlockRule === 'All' || fragment.unlock_rule === selectedUnlockRule
 
-      return searchMatches && characterMatches && unlockRuleMatches
+      return searchMatches && characterMatches
     })
-  }, [fragments, search, selectedCharacter, selectedUnlockRule])
+  }, [charactersById, fragments, search, selectedCharacter])
 
   const handleChange = (event) => {
     const { checked, name, type, value } = event.target
@@ -115,7 +156,7 @@ function AdminStoriesPage() {
 
   const resetForm = () => {
     setEditingId('')
-    setFormData(emptyForm)
+    setFormData(getEmptyFormForCharacters(activeCharacters))
   }
 
   const handleEdit = (fragment) => {
@@ -125,7 +166,7 @@ function AdminStoriesPage() {
       title: fragment.title,
       content: fragment.content,
       fragment_order: String(fragment.fragment_order || 1),
-      unlock_rule: fragment.unlock_rule || 'locked',
+      required_memories: String(fragment.required_memories || 0),
       is_active: fragment.is_active !== false,
     })
     window.requestAnimationFrame(() => {
@@ -143,14 +184,24 @@ function AdminStoriesPage() {
       return
     }
 
+    if (!formData.character_id) {
+      setError('Choose a character before saving this story fragment.')
+      return
+    }
+
     try {
       setSaving(true)
+      const requiredMemories = Math.max(
+        0,
+        Number(formData.required_memories) || 0,
+      )
       const payload = {
         character_id: formData.character_id,
         title: formData.title.trim(),
         content: formData.content.trim(),
         fragment_order: Number(formData.fragment_order) || 1,
-        unlock_rule: formData.unlock_rule,
+        required_memories: requiredMemories,
+        unlock_rule: requiredMemories === 0 ? 'default' : 'locked',
         is_active: formData.is_active,
       }
 
@@ -202,19 +253,22 @@ function AdminStoriesPage() {
   }
 
   return (
-    <div className="page-shell admin-stories-page">
+    <div className="page-shell wide-container admin-stories-page">
       <section className="admin-stories-page__header">
         <div className="section-heading">
           <p className="section-kicker">Admin</p>
           <h1>Manage Premium Story Fragments</h1>
           <p>
-            Add, edit, reorder, and retire Archive Zero fragments for En, Uan,
-            On, and Yal.
+            Add, edit, reorder, and retire Archive Zero fragments for any
+            active character.
           </p>
         </div>
         <div className="actions">
           <Button onClick={loadFragments} type="button" variant="secondary">
             Refresh
+          </Button>
+          <Button to="/admin/characters" variant="ghost">
+            Manage Characters
           </Button>
           <Button to="/admin" variant="ghost">
             Admin Dashboard
@@ -240,12 +294,20 @@ function AdminStoriesPage() {
                 onChange={handleChange}
                 value={formData.character_id}
               >
-                {archiveCharacters.map((character) => (
+                {characterOptions.map((character) => (
                   <option key={character.id} value={character.id}>
                     {character.name}
                   </option>
                 ))}
               </select>
+              {activeCharacters.length === 0 && (
+                <small className="admin-stories-page__field-note">
+                  No characters found. Create a character first.
+                  <Button to="/admin/characters" variant="ghost">
+                    Create Character
+                  </Button>
+                </small>
+              )}
             </label>
             <label>
               <span>Fragment order</span>
@@ -255,6 +317,16 @@ function AdminStoriesPage() {
                 onChange={handleChange}
                 type="number"
                 value={formData.fragment_order}
+              />
+            </label>
+            <label>
+              <span>Required memories</span>
+              <input
+                min="0"
+                name="required_memories"
+                onChange={handleChange}
+                type="number"
+                value={formData.required_memories}
               />
             </label>
           </div>
@@ -270,20 +342,6 @@ function AdminStoriesPage() {
               rows="8"
               value={formData.content}
             ></textarea>
-          </label>
-          <label>
-            <span>Unlock rule</span>
-            <select
-              name="unlock_rule"
-              onChange={handleChange}
-              value={formData.unlock_rule}
-            >
-              {unlockRuleOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
           </label>
           <label className="admin-stories-page__toggle">
             <input
@@ -322,19 +380,7 @@ function AdminStoriesPage() {
                 <option key={characterId} value={characterId}>
                   {characterId === 'All'
                     ? 'All characters'
-                    : getArchiveCharacterById(characterId)?.name}
-                </option>
-              ))}
-            </select>
-            <select
-              onChange={(event) => setSelectedUnlockRule(event.target.value)}
-              value={selectedUnlockRule}
-            >
-              {unlockRuleFilters.map((unlockRule) => (
-                <option key={unlockRule} value={unlockRule}>
-                  {unlockRule === 'All'
-                    ? 'All unlock rules'
-                    : unlockRule.replaceAll('_', ' ')}
+                    : getCharacterName(characters, characterId)}
                 </option>
               ))}
             </select>
@@ -343,16 +389,14 @@ function AdminStoriesPage() {
           {filteredFragments.length > 0 ? (
             <div className="admin-stories-page__items">
               {filteredFragments.map((fragment) => {
-                const character = getArchiveCharacterById(fragment.character_id)
-
                 return (
                   <article className="admin-stories-page__item" key={fragment.id}>
                     <div>
                       <h3>{fragment.title}</h3>
                       <p className="admin-stories-page__meta">
-                        {character?.name || fragment.character_id} / Order{' '}
-                        {fragment.fragment_order} /{' '}
-                        {fragment.unlock_rule.replaceAll('_', ' ')} /{' '}
+                        {getCharacterName(characters, fragment.character_id)} / Order{' '}
+                        {fragment.fragment_order} / Requires{' '}
+                        {fragment.required_memories || 0} memories /{' '}
                         {fragment.is_active ? 'Active' : 'Inactive'}
                       </p>
                       <p>{fragment.content}</p>

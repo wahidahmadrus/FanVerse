@@ -1,215 +1,246 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import Button from '../../components/Button/Button.jsx'
 import EmptyState from '../../components/EmptyState/EmptyState.jsx'
+import FandomArtistSelector from '../../components/FandomArtistSelector/FandomArtistSelector.jsx'
 import FormMessage from '../../components/FormMessage/FormMessage.jsx'
+import InviteFansCard from '../../components/InviteFansCard/InviteFansCard.jsx'
 import LoadingState from '../../components/LoadingState/LoadingState.jsx'
-import { getArtists } from '../../services/artistService.js'
+import MemoryCard from '../../components/MemoryCard/MemoryCard.jsx'
+import ProfileCompletionBanner from '../../components/ProfileCompletionBanner/ProfileCompletionBanner.jsx'
+import { useAuth } from '../../context/useAuth.js'
+import { getArtistById } from '../../services/artistService.js'
 import { getPublicMemories } from '../../services/memoryService.js'
+import {
+  getProfileCompletedValue,
+  shouldShowProfileCompletion,
+  updateProfile,
+  upsertProfile,
+} from '../../services/profileService.js'
 import './ExplorePage.css'
 
-const formatDate = (date) =>
-  new Intl.DateTimeFormat('en', {
-    month: 'short',
-    day: 'numeric',
-  }).format(new Date(`${date}T00:00:00`))
-
-function ArtistListItem({ artist }) {
-  return (
-    <Link className="explore-page__artist-item" to={`/artists/${artist.id}`}>
-      <span className="explore-page__avatar">
-        {artist.image_url ? <img src={artist.image_url} alt="" /> : artist.name.slice(0, 2)}
-      </span>
-      <span>
-        <strong>{artist.name}</strong>
-        <small>{artist.category}</small>
-      </span>
-      <em>{artist.fanCount || 0} fans</em>
-    </Link>
-  )
-}
-
-function PublicMemoryItem({ memory }) {
-  const activityType = memory.activity_type || memory.type
-  const stars = memory.final_stars || memory.stars || 0
-  const hasProof = memory.has_proof || Boolean(memory.proof_image_url)
-
-  return (
-    <article className="explore-page__memory-item">
-      <div>
-        <strong>{memory.title}</strong>
-        <span>{memory.artistName || memory.artist?.name || 'Unknown artist'}</span>
-        <p>{activityType} / {formatDate(memory.memory_date || memory.date)}</p>
-      </div>
-      <div>
-        <em>{stars} stars</em>
-        <small>{hasProof ? 'Proof Added' : 'Memory Only'}</small>
-      </div>
-    </article>
-  )
-}
-
 function ExplorePage() {
-  const navigate = useNavigate()
-  const [artists, setArtists] = useState([])
-  const [recentArtists, setRecentArtists] = useState([])
+  const { profile, refreshProfile, user } = useAuth()
+  const [artist, setArtist] = useState(null)
   const [memories, setMemories] = useState([])
-  const [search, setSearch] = useState('')
-  const [showSuggestions, setShowSuggestions] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [otherMemories, setOtherMemories] = useState([])
+  const [savingFandom, setSavingFandom] = useState(false)
+  const [loading, setLoading] = useState(Boolean(user))
+  const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
+  const profileIncomplete = shouldShowProfileCompletion(profile)
+
   useEffect(() => {
-    const loadExplore = async () => {
+    let cancelled = false
+
+    const loadFandom = async () => {
+      if (!user || profileIncomplete) {
+        setArtist(null)
+        setMemories([])
+        setOtherMemories([])
+        setLoading(false)
+        return
+      }
+
       try {
         setLoading(true)
-        const [artistRows, recentArtistRows, publicMemories] = await Promise.all([
-          getArtists(),
-          getArtists({ limit: 4 }),
-          getPublicMemories({ limit: 5 }),
+        setError('')
+        const artistId = profile.main_artist_id
+        const [artistRow, publicRows, otherRows] = await Promise.all([
+          getArtistById(artistId),
+          getPublicMemories({ artistId, limit: 12 }),
+          getPublicMemories({ artistId, excludeUserId: user.id, limit: 4 }),
         ])
-        setArtists(artistRows)
-        setRecentArtists(recentArtistRows)
-        setMemories(publicMemories)
+
+        if (!cancelled) {
+          setArtist(artistRow)
+          setMemories(publicRows)
+          setOtherMemories(otherRows)
+        }
       } catch (loadError) {
-        setError(loadError.message)
+        if (!cancelled) {
+          setError(loadError.message)
+        }
       } finally {
-        setLoading(false)
+        if (!cancelled) {
+          setLoading(false)
+        }
       }
     }
 
-    loadExplore()
-  }, [])
+    loadFandom()
 
-  const filteredArtists = useMemo(() => {
-    if (!search.trim()) {
-      return artists
+    return () => {
+      cancelled = true
+    }
+  }, [profile, profileIncomplete, user])
+
+  const handleFandomSelected = async (selectedArtist) => {
+    if (!user) {
+      return
     }
 
-    return artists.filter((artist) =>
-      artist.name.toLowerCase().includes(search.trim().toLowerCase()),
-    )
-  }, [artists, search])
-  const suggestionArtists = search.trim() ? filteredArtists.slice(0, 6) : []
-  const featuredArtists = search.trim() ? filteredArtists.slice(0, 8) : artists.slice(0, 8)
+    try {
+      setSavingFandom(true)
+      setError('')
+      const displayName =
+        profile?.display_name ||
+        user.user_metadata?.display_name ||
+        user.email?.split('@')[0] ||
+        'Fan Explorer'
+      const nextProfile = {
+        ...profile,
+        display_name: displayName,
+        main_artist_id: selectedArtist.id,
+      }
+      const payload = {
+        user_id: user.id,
+        email: profile?.email || user.email || '',
+        display_name: displayName,
+        bio: profile?.bio || '',
+        favorite_artist: selectedArtist.name,
+        favorite_fandom_artist: selectedArtist.name,
+        main_artist_id: selectedArtist.id,
+        profile_completed: getProfileCompletedValue(nextProfile),
+        avatar_url: profile?.avatar_url || null,
+      }
+
+      if (profile) {
+        await updateProfile(user.id, payload)
+      } else {
+        await upsertProfile(payload)
+      }
+
+      await refreshProfile(user.id)
+      setMessage('Your fan profile is ready.')
+    } catch (saveError) {
+      setError(saveError.message)
+    } finally {
+      setSavingFandom(false)
+    }
+  }
 
   if (loading) {
-    return <LoadingState label="Discovering the fan universe" />
+    return <LoadingState label="Opening your fandom space" />
+  }
+
+  if (!user) {
+    return (
+      <div className="page-shell content-container explore-page">
+        <section className="explore-page__hero">
+          <div>
+            <p className="section-kicker">Fandom</p>
+            <h1>Choose your fandom first</h1>
+            <p>
+              FanVerse Archive focuses on one Main Fandom / Artist for each fan
+              profile.
+            </p>
+          </div>
+          <div className="actions">
+            <Button to="/signup">Create Profile</Button>
+            <Button to="/signin" variant="secondary">
+              Sign In
+            </Button>
+          </div>
+        </section>
+      </div>
+    )
   }
 
   return (
-    <div className="page-shell explore-page">
-      <section className="explore-page__hero">
-        <div>
-          <p className="section-kicker">Explore</p>
-          <h1>Discover the shared world of fandom</h1>
-          <p>
-            Browse artists, public fan memories, and new communities growing one
-            archive at a time.
-          </p>
-        </div>
-        <div className="actions">
-          <Button to="/artists">Explore Artists</Button>
-          <Button to="/create-artist" variant="secondary">
-            Create Artist
-          </Button>
-        </div>
-      </section>
-
+    <div className="page-shell wide-container explore-page">
+      <FormMessage type="success">{message}</FormMessage>
       <FormMessage type="error">{error}</FormMessage>
 
-      <section className="explore-page__search glass-panel">
-        <label>
-          <span>Search artists</span>
-          <input
-            onChange={(event) => setSearch(event.target.value)}
-            onFocus={() => setShowSuggestions(true)}
-            placeholder="Search for an artist in the universe..."
-            type="search"
-            value={search}
-          />
-        </label>
-        {showSuggestions && search.trim() && (
-          <div className="explore-page__suggestions">
-            {suggestionArtists.length > 0 ? (
-              suggestionArtists.map((artist) => (
-                <button
-                  key={artist.id}
-                  onClick={() => navigate(`/artists/${artist.id}`)}
-                  type="button"
-                >
-                  <span>{artist.name}</span>
-                  <small>{artist.category}</small>
-                </button>
-              ))
-            ) : (
-              <div>
-                <p>Artist not found. Create this artist?</p>
-                <Button to="/create-artist" variant="secondary">
-                  Create Artist
-                </Button>
+      {profileIncomplete ? (
+        <>
+          <ProfileCompletionBanner />
+          <section className="explore-page__setup glass-panel">
+            <div className="section-heading">
+              <p className="section-kicker">Choose Your Fandom</p>
+              <h1>Your fandom space starts here</h1>
+              <p>
+                Pick one Main Fandom / Artist to focus your dashboard,
+                memories, and community view.
+              </p>
+            </div>
+            <FandomArtistSelector
+              autoFocus
+              onArtistSelected={handleFandomSelected}
+              userId={user.id}
+            />
+            {savingFandom && (
+              <p className="explore-page__saving">Saving your fandom space...</p>
+            )}
+          </section>
+        </>
+      ) : (
+        <>
+          <section className="explore-page__hero">
+            <div>
+              <p className="section-kicker">Fandom</p>
+              <h1>{artist?.name} fandom space</h1>
+              <p>
+                Public memories, fan count, and invite tools for your selected
+                Main Fandom / Artist.
+              </p>
+            </div>
+            <div className="actions">
+              <Button to="/add-memory">Write a Fan Memory</Button>
+              <Button to="/profile" variant="secondary">
+                Change Fandom
+              </Button>
+            </div>
+          </section>
+
+          <section className="explore-page__fandom-card glass-panel">
+            <div className="explore-page__fandom-image">
+              {artist?.image_url ? (
+                <img src={artist.image_url} alt="" />
+              ) : (
+                <span>{artist?.name?.slice(0, 2).toUpperCase() || 'FV'}</span>
+              )}
+            </div>
+            <div>
+              <p className="section-kicker">{artist?.category || 'Fandom'}</p>
+              <h2>{artist?.name}</h2>
+              <p>{artist?.description || 'Your fandom space is growing memory by memory.'}</p>
+              <div className="explore-page__stats">
+                <span>{artist?.fanCount || 0} fans</span>
+                <span>{artist?.memoryCount || 0} memories</span>
+                <span>{memories.length} public entries</span>
               </div>
-            )}
-          </div>
-        )}
-      </section>
+            </div>
+          </section>
 
-      <section className="page-section">
-        <div className="section-heading">
-          <p className="section-kicker">{search.trim() ? 'Search Results' : 'Featured Artists'}</p>
-          <h2>{search.trim() ? 'Artists matching your search' : 'Fan communities lighting up'}</h2>
-        </div>
+          {(otherMemories.length === 0 || memories.length <= 2) && (
+            <InviteFansCard artistName={artist?.name || 'this fandom'} />
+          )}
 
-        {featuredArtists.length > 0 ? (
-          <div className="explore-page__list">
-            {featuredArtists.map((artist) => (
-              <ArtistListItem artist={artist} key={artist.id} />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            actionLabel="Create Artist"
-            actionTo="/create-artist"
-            description="This artist is not in the universe yet. Create their first fan archive."
-            title="No artist found"
-          />
-        )}
-      </section>
+          <section className="page-section">
+            <div className="section-heading">
+              <p className="section-kicker">Community Memories</p>
+              <h2>Public memories from this fandom</h2>
+              <p>
+                Only memories connected to your selected fandom appear here.
+              </p>
+            </div>
 
-      <section className="page-section explore-page__split">
-        <div>
-          <div className="section-heading">
-            <p className="section-kicker">Recent Artists</p>
-            <h2>New archives</h2>
-          </div>
-          <div className="explore-page__mini-list">
-            {recentArtists.map((artist) => (
-              <ArtistListItem artist={artist} key={artist.id} />
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <div className="section-heading">
-            <p className="section-kicker">Recent Fan Memories</p>
-            <h2>Public posts</h2>
-          </div>
-          <div className="explore-page__memory-list">
-            {memories.length > 0 ? (
-              memories.map((memory) => (
-                <PublicMemoryItem key={memory.id} memory={memory} />
-              ))
-            ) : (
-              <EmptyState
-                actionLabel="Add Memory"
-                actionTo="/add-memory"
-                description="Public memories will appear here as fans begin archiving their journeys."
-                title="No public memories yet"
-              />
-            )}
-          </div>
-        </div>
-      </section>
+            <div className="explore-page__memory-list">
+              {memories.length > 0 ? (
+                memories.map((memory) => <MemoryCard compact key={memory.id} memory={memory} />)
+              ) : (
+                <EmptyState
+                  actionLabel="Write a Fan Memory"
+                  actionTo="/add-memory"
+                  description="Be the first to write a memory."
+                  title="No memories have been archived for this fandom yet."
+                />
+              )}
+            </div>
+          </section>
+        </>
+      )}
     </div>
   )
 }

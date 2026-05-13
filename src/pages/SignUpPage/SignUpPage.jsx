@@ -45,7 +45,7 @@ function SignUpPage() {
       })
 
       if (data.session) {
-        navigate('/onboarding/first-card', { replace: true })
+        navigate('/dashboard', { replace: true })
       } else {
         navigate('/signin', {
           replace: true,
@@ -60,14 +60,14 @@ function SignUpPage() {
   }
 
   return (
-    <div className="page-shell signup-page">
+    <div className="page-shell narrow-container signup-page">
       <section className="signup-page__panel glass-panel">
         <div>
           <p className="section-kicker">Sign Up</p>
           <h1>Create your fan archive</h1>
           <p>
-            Join the public FanVerse, support artists, and keep your memories in
-            a place built for them.
+            Choose one Main Fandom / Artist, then keep your memories in a place
+            built for them.
           </p>
         </div>
 

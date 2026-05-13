@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext.jsx'
 import MainLayout from './layouts/MainLayout/MainLayout.jsx'
 import AddMemoryPage from './pages/AddMemoryPage/AddMemoryPage.jsx'
 import AdminPage from './pages/AdminPage/AdminPage.jsx'
+import AdminCharactersPage from './pages/AdminCharactersPage/AdminCharactersPage.jsx'
 import AdminCollectiblesPage from './pages/AdminCollectiblesPage/AdminCollectiblesPage.jsx'
 import AdminStoriesPage from './pages/AdminStoriesPage/AdminStoriesPage.jsx'
 import ArtistDetailPage from './pages/ArtistDetailPage/ArtistDetailPage.jsx'
@@ -12,7 +13,6 @@ import CreateArtistPage from './pages/CreateArtistPage/CreateArtistPage.jsx'
 import CollectiblesPage from './pages/CollectiblesPage/CollectiblesPage.jsx'
 import DashboardPage from './pages/DashboardPage/DashboardPage.jsx'
 import EditMemoryPage from './pages/EditMemoryPage/EditMemoryPage.jsx'
-import FirstCardOnboardingPage from './pages/FirstCardOnboardingPage/FirstCardOnboardingPage.jsx'
 import ExplorePage from './pages/ExplorePage/ExplorePage.jsx'
 import LandingPage from './pages/LandingPage/LandingPage.jsx'
 import MyArchivePage from './pages/MyArchivePage/MyArchivePage.jsx'
@@ -44,7 +44,7 @@ function App() {
               <Route path="/create-artist" element={<CreateArtistPage />} />
               <Route path="/my-archive" element={<MyArchivePage />} />
               <Route path="/memories/:memoryId/edit" element={<EditMemoryPage />} />
-              <Route path="/onboarding/first-card" element={<FirstCardOnboardingPage />} />
+              <Route path="/onboarding/first-card" element={<Navigate replace to="/profile" />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/universe" element={<UniversePage />} />
               <Route path="/archive" element={<Navigate replace to="/my-archive" />} />
@@ -54,6 +54,7 @@ function App() {
                 <Route path="/admin/artists" element={<AdminPage />} />
                 <Route path="/admin/memories" element={<AdminPage />} />
                 <Route path="/admin/badges" element={<AdminPage />} />
+                <Route path="/admin/characters" element={<AdminCharactersPage />} />
                 <Route path="/admin/collectibles" element={<AdminCollectiblesPage />} />
                 <Route path="/admin/stories" element={<AdminStoriesPage />} />
               </Route>

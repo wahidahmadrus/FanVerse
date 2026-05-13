@@ -2,8 +2,13 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '../../components/Button/Button.jsx'
 import FormMessage from '../../components/FormMessage/FormMessage.jsx'
-import { useAuth } from '../../context/useAuth.js'
 import { createArtist } from '../../services/artistService.js'
+import { useAuth } from '../../context/useAuth.js'
+import {
+  getProfileCompletedValue,
+  updateProfile,
+  upsertProfile,
+} from '../../services/profileService.js'
 import { STORAGE_BUCKETS, uploadImage, validateImageFile } from '../../services/uploadService.js'
 import './CreateArtistPage.css'
 
@@ -15,7 +20,7 @@ const initialFormData = {
 
 function CreateArtistPage() {
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { profile, refreshProfile, user } = useAuth()
   const [formData, setFormData] = useState(initialFormData)
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState('')
@@ -80,9 +85,38 @@ function CreateArtistPage() {
           imageUrl,
         },
       })
+      const displayName =
+        profile?.display_name ||
+        user.user_metadata?.display_name ||
+        user.email?.split('@')[0] ||
+        'Fan Explorer'
+      const nextProfile = {
+        ...profile,
+        display_name: displayName,
+        main_artist_id: artist.id,
+      }
+      const profilePayload = {
+        user_id: user.id,
+        email: profile?.email || user.email || '',
+        display_name: displayName,
+        bio: profile?.bio || '',
+        favorite_artist: artist.name,
+        favorite_fandom_artist: artist.name,
+        main_artist_id: artist.id,
+        profile_completed: getProfileCompletedValue(nextProfile),
+        avatar_url: profile?.avatar_url || null,
+      }
+
+      if (profile) {
+        await updateProfile(user.id, profilePayload)
+      } else {
+        await upsertProfile(profilePayload)
+      }
+
+      await refreshProfile(user.id)
 
       navigate(`/artists/${artist.id}`, {
-        state: { message: 'You are the first fan to archive this artist.' },
+        state: { message: 'You are the first fan archiver for this fandom.' },
       })
     } catch (submitError) {
       setError(submitError.message)
@@ -92,7 +126,7 @@ function CreateArtistPage() {
   }
 
   return (
-    <div className="page-shell create-artist-page">
+    <div className="page-shell form-container create-artist-page">
       <section className="section-heading">
         <p className="section-kicker">Create Artist</p>
         <h1>Start a new fan archive</h1>

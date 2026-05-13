@@ -58,11 +58,44 @@ img {
 
 .page-shell {
   margin: 0 auto;
-  max-width: var(--max-page-width);
+  max-width: var(--page-shell-max-width, var(--max-page-width));
   padding: var(--space-7) var(--page-gutter) var(--space-9);
   position: relative;
   width: 100%;
   z-index: 1;
+}
+
+.page-container,
+.main-container,
+.app-container,
+.wide-container,
+.content-container,
+.form-container,
+.narrow-container {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: var(--container-max-width, var(--max-page-width));
+  width: 100%;
+}
+
+.wide-container {
+  --container-max-width: var(--max-wide-page-width);
+  --page-shell-max-width: var(--max-wide-page-width);
+}
+
+.content-container {
+  --container-max-width: var(--max-content-page-width);
+  --page-shell-max-width: var(--max-content-page-width);
+}
+
+.form-container {
+  --container-max-width: var(--max-form-page-width);
+  --page-shell-max-width: var(--max-form-page-width);
+}
+
+.narrow-container {
+  --container-max-width: var(--max-narrow-page-width);
+  --page-shell-max-width: var(--max-narrow-page-width);
 }
 
 form,
@@ -188,14 +221,50 @@ a {
   }
 }
 
+@media (min-width: 1320px) {
+  .wide-container :where(.grid--3) {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  }
+
+  .wide-container :where(.grid--4) {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  }
+}
+
+@media (min-width: 1600px) {
+  .wide-container {
+    --container-max-width: var(--max-wide-page-width-xl);
+    --page-shell-max-width: var(--max-wide-page-width-xl);
+  }
+}
+
+@media (max-width: 768px) {
+  .page-shell,
+  .page-container,
+  .main-container,
+  .app-container,
+  .wide-container,
+  .content-container,
+  .form-container,
+  .narrow-container {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .page-shell {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+}
+
 @media (max-width: 680px) {
   body {
     padding-bottom: 5.6rem;
   }
 
   .page-shell {
-    padding: var(--space-5) max(0.875rem, env(safe-area-inset-left)) var(--space-7)
-      max(0.875rem, env(safe-area-inset-right));
+    padding: var(--space-5) max(1rem, env(safe-area-inset-left)) var(--space-7)
+      max(1rem, env(safe-area-inset-right));
   }
 
   .page-section {

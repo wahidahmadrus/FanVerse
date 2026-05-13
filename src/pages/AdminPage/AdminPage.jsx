@@ -5,11 +5,13 @@ import EmptyState from '../../components/EmptyState/EmptyState.jsx'
 import FormMessage from '../../components/FormMessage/FormMessage.jsx'
 import LoadingState from '../../components/LoadingState/LoadingState.jsx'
 import StatCard from '../../components/StatCard/StatCard.jsx'
+import { useAuth } from '../../context/useAuth.js'
 import {
   createBadgeAdmin,
   deleteArtistAdmin,
   deleteBadgeAdmin,
   deleteMemoryAdmin,
+  deleteUserAdmin,
   getAdminDashboard,
   updateBadgeAdmin,
   updateMemoryAdmin,
@@ -176,9 +178,248 @@ function AdminMemoryModal({ memory, onClose }) {
   )
 }
 
+function AdminUserModal({
+  artists,
+  draft,
+  isSelf,
+  onClose,
+  onDraftChange,
+  onRequestDelete,
+  onSave,
+  profile,
+  stats,
+  workingId,
+}) {
+  if (!profile) {
+    return null
+  }
+
+  return (
+    <div className="admin-page__modal-overlay" onMouseDown={onClose} role="presentation">
+      <section
+        aria-labelledby={`admin-user-${profile.id}`}
+        aria-modal="true"
+        className="admin-page__user-modal"
+        onMouseDown={(event) => event.stopPropagation()}
+        role="dialog"
+      >
+        <button className="admin-page__modal-close" onClick={onClose} type="button">
+          Close
+        </button>
+
+        <div>
+          <p className="section-kicker">User Details</p>
+          <h2 id={`admin-user-${profile.id}`}>
+            {profile.display_name || 'Fan Explorer'}
+          </h2>
+          <p>{profile.email || 'Email not available'}</p>
+        </div>
+
+        <dl className="admin-page__user-stats">
+          <div>
+            <dt>Total memories</dt>
+            <dd>{stats.totalMemories}</dd>
+          </div>
+          <div>
+            <dt>Total stars</dt>
+            <dd>{stats.totalStars}</dd>
+          </div>
+          <div>
+            <dt>Cards unlocked</dt>
+            <dd>{stats.cardsUnlocked}</dd>
+          </div>
+          <div>
+            <dt>Joined</dt>
+            <dd>{formatDate(profile.created_at)}</dd>
+          </div>
+        </dl>
+
+        <div className="admin-page__user-form">
+          <label>
+            <span>Display name</span>
+            <input
+              onChange={(event) => onDraftChange(profile, 'display_name', event.target.value)}
+              value={draft.display_name}
+            />
+          </label>
+          <label>
+            <span>Email display field</span>
+            <input
+              onChange={(event) => onDraftChange(profile, 'email', event.target.value)}
+              value={draft.email}
+            />
+          </label>
+          <label>
+            <span>Favorite Fandom / Artist</span>
+            <input
+              onChange={(event) =>
+                onDraftChange(profile, 'favorite_fandom_artist', event.target.value)
+              }
+              value={draft.favorite_fandom_artist}
+            />
+          </label>
+          <label>
+            <span>Main artist</span>
+            <select
+              onChange={(event) => onDraftChange(profile, 'main_artist_id', event.target.value)}
+              value={draft.main_artist_id}
+            >
+              <option value="">No main fandom selected</option>
+              {artists.map((artist) => (
+                <option key={artist.id} value={artist.id}>
+                  {artist.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="admin-page__user-form--wide">
+            <span>Bio</span>
+            <textarea
+              onChange={(event) => onDraftChange(profile, 'bio', event.target.value)}
+              rows="4"
+              value={draft.bio}
+            ></textarea>
+          </label>
+          <label>
+            <span>Admin access</span>
+            <select
+              onChange={(event) =>
+                onDraftChange(profile, 'is_admin', event.target.value === 'true')
+              }
+              value={String(draft.is_admin)}
+            >
+              <option value="false">user</option>
+              <option value="true">admin</option>
+            </select>
+          </label>
+          <label>
+            <span>Status</span>
+            <select
+              onChange={(event) => onDraftChange(profile, 'status', event.target.value)}
+              value={draft.status}
+            >
+              <option value="active">active</option>
+              <option value="disabled">disabled</option>
+            </select>
+          </label>
+        </div>
+
+        <div className="actions">
+          <Button
+            disabled={workingId === profile.id}
+            onClick={() => onSave(profile)}
+            type="button"
+          >
+            {workingId === profile.id ? 'Saving...' : 'Save User'}
+          </Button>
+          <Button onClick={onClose} type="button" variant="secondary">
+            Cancel
+          </Button>
+        </div>
+
+        <section className="admin-page__danger-zone">
+          <div>
+            <h3>Danger Zone</h3>
+            <p>
+              Permanently delete this user account and its related archive data
+              through the secure delete-user Edge Function.
+            </p>
+            {isSelf && (
+              <p>
+                You cannot permanently delete your own account from this admin
+                action.
+              </p>
+            )}
+          </div>
+          <Button
+            className="admin-page__danger-button"
+            disabled={isSelf}
+            onClick={() => onRequestDelete(profile)}
+            type="button"
+            variant="ghost"
+          >
+            Permanently Delete User
+          </Button>
+        </section>
+      </section>
+    </div>
+  )
+}
+
+function DeleteUserConfirmModal({
+  deleting,
+  error,
+  onClose,
+  onConfirm,
+  profile,
+}) {
+  const [confirmation, setConfirmation] = useState('')
+
+  if (!profile) {
+    return null
+  }
+
+  const canDelete = confirmation.trim() === 'DELETE'
+
+  return (
+    <div className="admin-page__modal-overlay" onMouseDown={onClose} role="presentation">
+      <section
+        aria-labelledby={`delete-user-${profile.id}`}
+        aria-modal="true"
+        className="admin-page__delete-modal"
+        onMouseDown={(event) => event.stopPropagation()}
+        role="dialog"
+      >
+        <button className="admin-page__modal-close" onClick={onClose} type="button">
+          Close
+        </button>
+
+        <div>
+          <p className="section-kicker">Permanent Delete</p>
+          <h2 id={`delete-user-${profile.id}`}>
+            Delete {profile.display_name || 'this user'}?
+          </h2>
+          <p className="admin-page__delete-warning">
+            This will permanently delete this user account, profile, memories,
+            card unlocks, and related data. This action cannot be undone.
+          </p>
+        </div>
+
+        <label className="admin-page__delete-confirm">
+          <span>Type DELETE to confirm</span>
+          <input
+            autoFocus
+            onChange={(event) => setConfirmation(event.target.value)}
+            placeholder="DELETE"
+            value={confirmation}
+          />
+        </label>
+
+        <FormMessage type="error">{error}</FormMessage>
+
+        <div className="actions">
+          <Button
+            disabled={!canDelete || deleting}
+            className="admin-page__danger-button"
+            onClick={() => onConfirm(profile)}
+            type="button"
+            variant="ghost"
+          >
+            {deleting ? 'Deleting...' : 'Permanently Delete User'}
+          </Button>
+          <Button disabled={deleting} onClick={onClose} type="button" variant="secondary">
+            Cancel
+          </Button>
+        </div>
+      </section>
+    </div>
+  )
+}
+
 function AdminPage() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const activePanel = routePanels[location.pathname] || 'Overview'
   const [dashboard, setDashboard] = useState({
     profiles: [],
@@ -187,6 +428,7 @@ function AdminPage() {
     badges: [],
     fanLinks: [],
     userBadges: [],
+    userCards: [],
   })
   const [loading, setLoading] = useState(true)
   const [workingId, setWorkingId] = useState('')
@@ -201,7 +443,11 @@ function AdminPage() {
   const [badgeForm, setBadgeForm] = useState(emptyBadgeForm)
   const [editingBadgeId, setEditingBadgeId] = useState('')
   const [editingProfiles, setEditingProfiles] = useState({})
+  const [selectedProfile, setSelectedProfile] = useState(null)
   const [selectedMemory, setSelectedMemory] = useState(null)
+  const [deleteCandidate, setDeleteCandidate] = useState(null)
+  const [deleteError, setDeleteError] = useState('')
+  const [deletingUserId, setDeletingUserId] = useState('')
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
 
@@ -261,6 +507,39 @@ function AdminPage() {
     [dashboard],
   )
 
+  const artistsById = useMemo(
+    () =>
+      new Map(
+        dashboard.artists.map((artist) => [
+          artist.id,
+          artist,
+        ]),
+      ),
+    [dashboard.artists],
+  )
+
+  const userStatsById = useMemo(() => {
+    const nextStats = new Map()
+
+    dashboard.profiles.forEach((profile) => {
+      const userMemories = dashboard.memories.filter(
+        (memory) => memory.user_id === profile.user_id,
+      )
+      nextStats.set(profile.user_id, {
+        cardsUnlocked: dashboard.userCards.filter(
+          (card) => card.user_id === profile.user_id,
+        ).length,
+        totalMemories: userMemories.length,
+        totalStars: userMemories.reduce(
+          (total, memory) => total + Number(memory.final_stars || memory.stars || 0),
+          0,
+        ),
+      })
+    })
+
+    return nextStats
+  }, [dashboard.memories, dashboard.profiles, dashboard.userCards])
+
   const filteredProfiles = useMemo(() => {
     const query = userSearch.trim().toLowerCase()
 
@@ -274,6 +553,8 @@ function AdminPage() {
         profile.email,
         profile.bio,
         profile.favorite_artist,
+        profile.favorite_fandom_artist,
+        artistsById.get(profile.main_artist_id)?.name,
         profile.role,
         profile.status,
         profile.user_id,
@@ -282,7 +563,7 @@ function AdminPage() {
         .toLowerCase()
         .includes(query),
     )
-  }, [dashboard.profiles, userSearch])
+  }, [artistsById, dashboard.profiles, userSearch])
 
   const filteredArtists = useMemo(() => {
     const query = artistSearch.trim().toLowerCase()
@@ -418,9 +699,13 @@ function AdminPage() {
   const getProfileDraft = (profile) =>
     editingProfiles[profile.id] || {
       display_name: profile.display_name || '',
+      email: profile.email || '',
       bio: profile.bio || '',
       favorite_artist: profile.favorite_artist || '',
-      role: profile.role || 'user',
+      favorite_fandom_artist:
+        profile.favorite_fandom_artist || profile.favorite_artist || '',
+      is_admin: Boolean(profile.is_admin || profile.role === 'admin'),
+      main_artist_id: profile.main_artist_id || '',
       status: profile.status || 'active',
     }
 
@@ -436,6 +721,10 @@ function AdminPage() {
 
   const handleSaveProfile = async (profile) => {
     const draft = getProfileDraft(profile)
+    const fandomName =
+      draft.favorite_fandom_artist.trim() ||
+      artistsById.get(draft.main_artist_id)?.name ||
+      draft.favorite_artist.trim()
 
     await runAdminAction({
       id: profile.id,
@@ -445,9 +734,15 @@ function AdminPage() {
           profileId: profile.id,
           updates: {
             display_name: draft.display_name.trim() || 'Fan Explorer',
+            email: draft.email.trim(),
             bio: draft.bio.trim(),
-            favorite_artist: draft.favorite_artist.trim(),
-            role: draft.role,
+            favorite_artist: fandomName,
+            favorite_fandom_artist: fandomName,
+            main_artist_id: draft.main_artist_id || null,
+            profile_completed: Boolean(
+              draft.display_name.trim() && draft.main_artist_id,
+            ),
+            role: draft.is_admin ? 'admin' : 'user',
             status: draft.status,
           },
         })
@@ -457,6 +752,7 @@ function AdminPage() {
             currentProfile.id === profile.id ? updatedProfile : currentProfile,
           ),
         }))
+        setSelectedProfile(updatedProfile)
         setEditingProfiles((currentProfiles) => {
           const nextProfiles = { ...currentProfiles }
           delete nextProfiles[profile.id]
@@ -464,6 +760,78 @@ function AdminPage() {
         })
       },
     })
+  }
+
+  const handleProfileStatus = async (profile, status) => {
+    await runAdminAction({
+      id: profile.id,
+      successMessage:
+        status === 'disabled'
+          ? `${profile.display_name || 'This user'} was disabled.`
+          : `${profile.display_name || 'This user'} was reactivated.`,
+      action: async () => {
+        const updatedProfile = await updateProfileAdmin({
+          profileId: profile.id,
+          updates: { status },
+        })
+        setDashboard((currentDashboard) => ({
+          ...currentDashboard,
+          profiles: currentDashboard.profiles.map((currentProfile) =>
+            currentProfile.id === profile.id ? updatedProfile : currentProfile,
+          ),
+        }))
+        if (selectedProfile?.id === profile.id) {
+          setSelectedProfile(updatedProfile)
+        }
+      },
+    })
+  }
+
+  const handleOpenDeleteUser = (profile) => {
+    setDeleteCandidate(profile)
+    setDeleteError('')
+  }
+
+  const handlePermanentDeleteUser = async (profile) => {
+    try {
+      setDeletingUserId(profile.id)
+      setDeleteError('')
+      setError('')
+      setMessage('')
+      await deleteUserAdmin({ userId: profile.user_id })
+      setDashboard((currentDashboard) => ({
+        ...currentDashboard,
+        fanLinks: currentDashboard.fanLinks.filter(
+          (fanLink) => fanLink.user_id !== profile.user_id,
+        ),
+        memories: currentDashboard.memories.filter(
+          (memory) => memory.user_id !== profile.user_id,
+        ),
+        profiles: currentDashboard.profiles.filter(
+          (currentProfile) => currentProfile.user_id !== profile.user_id,
+        ),
+        userBadges: currentDashboard.userBadges.filter(
+          (badge) => badge.user_id !== profile.user_id,
+        ),
+        userCards: currentDashboard.userCards.filter(
+          (card) => card.user_id !== profile.user_id,
+        ),
+      }))
+      setEditingProfiles((currentProfiles) => {
+        const nextProfiles = { ...currentProfiles }
+        delete nextProfiles[profile.id]
+        return nextProfiles
+      })
+      setSelectedProfile(null)
+      setDeleteCandidate(null)
+      setMessage('User permanently deleted.')
+    } catch (deleteUserError) {
+      setDeleteError(
+        deleteUserError.message || 'This user could not be permanently deleted.',
+      )
+    } finally {
+      setDeletingUserId('')
+    }
   }
 
   const handleDeleteArtist = async (artist) => {
@@ -637,19 +1005,22 @@ function AdminPage() {
   }
 
   return (
-    <div className="page-shell admin-page">
+    <div className="page-shell wide-container admin-page">
       <section className="admin-page__header">
         <div className="section-heading">
           <p className="section-kicker">Admin</p>
           <h1>FanVerse Control Center</h1>
           <p>
-            Manage users, artists, memories, badges, and moderation from one
-            protected admin space.
+            Manage users, artists, characters, memories, badges, and moderation
+            from one protected admin space.
           </p>
         </div>
         <div className="actions">
           <Button onClick={loadDashboard} type="button" variant="secondary">
             Refresh
+          </Button>
+          <Button to="/admin/characters" variant="ghost">
+            Manage Characters
           </Button>
           <Button to="/admin/collectibles" variant="ghost">
             Manage Collectible Cards
@@ -710,90 +1081,72 @@ function AdminPage() {
           <div className="admin-page__filters glass-panel">
             <input
               onChange={(event) => setUserSearch(event.target.value)}
-              placeholder="Search users by name, email, favorite artist, role, status..."
+              placeholder="Search users by name, email, fandom, role, status..."
               type="search"
               value={userSearch}
             />
           </div>
-          <div className="admin-page__table">
+          <div className="admin-page__user-list">
             {filteredProfiles.map((profile) => {
-              const draft = getProfileDraft(profile)
+              const mainArtist = artistsById.get(profile.main_artist_id)
+              const isDisabled = profile.status === 'disabled'
+              const roleLabel =
+                profile.is_admin || profile.role === 'admin' ? 'admin' : 'user'
 
               return (
-                <article className="admin-page__row admin-page__row--user" key={profile.id}>
-                  <div>
-                    <strong>{profile.display_name}</strong>
+                <article className="admin-page__user-row" key={profile.id}>
+                  <div className="admin-page__user-identity">
+                    <strong>{profile.display_name || 'Fan Explorer'}</strong>
                     <span>{profile.email || 'Email not available'}</span>
-                    <span>{profile.favorite_artist || 'Favorite artist not set'}</span>
+                  </div>
+                  <div>
                     <span>
-                      {profile.role || 'user'} / {profile.status || 'active'} /{' '}
-                      {formatDate(profile.created_at)}
+                      {mainArtist?.name ||
+                        profile.favorite_fandom_artist ||
+                        profile.favorite_artist ||
+                        'Main fandom not set'}
                     </span>
+                    <span>Main Fandom / Artist</span>
                   </div>
-                  <div className="admin-page__profile-fields">
-                    <input
-                      onChange={(event) =>
-                        handleProfileDraftChange(profile, 'display_name', event.target.value)
-                      }
-                      placeholder="Display name"
-                      value={draft.display_name}
-                    />
-                    <input
-                      onChange={(event) =>
-                        handleProfileDraftChange(profile, 'favorite_artist', event.target.value)
-                      }
-                      placeholder="Favorite artist"
-                      value={draft.favorite_artist}
-                    />
-                    <textarea
-                      onChange={(event) =>
-                        handleProfileDraftChange(profile, 'bio', event.target.value)
-                      }
-                      placeholder="Bio"
-                      rows="2"
-                      value={draft.bio}
-                    ></textarea>
+                  <div>
+                    <span>{roleLabel}</span>
+                    <span>{isDisabled ? 'disabled' : 'active'}</span>
                   </div>
-                  <div className="admin-page__profile-controls">
-                    <label>
-                      <span>Role</span>
-                      <select
-                        disabled={workingId === profile.id}
-                        onChange={(event) =>
-                          handleProfileDraftChange(profile, 'role', event.target.value)
-                        }
-                        value={draft.role}
-                      >
-                        <option value="user">user</option>
-                        <option value="admin">admin</option>
-                      </select>
-                    </label>
-                    <label>
-                      <span>Status</span>
-                      <select
-                        disabled={workingId === profile.id}
-                        onChange={(event) =>
-                          handleProfileDraftChange(profile, 'status', event.target.value)
-                        }
-                        value={draft.status}
-                      >
-                        <option value="active">active</option>
-                        <option value="disabled">disabled</option>
-                      </select>
-                    </label>
+                  <div>
+                    <span>{formatDate(profile.created_at)}</span>
+                    <span>Joined</span>
+                  </div>
+                  <div className="admin-page__user-actions">
                     <Button
-                      disabled={workingId === profile.id}
-                      onClick={() => handleSaveProfile(profile)}
+                      onClick={() => setSelectedProfile(profile)}
                       type="button"
                       variant="secondary"
                     >
-                      {workingId === profile.id ? 'Saving...' : 'Save'}
+                      Details
+                    </Button>
+                    <Button
+                      disabled={workingId === profile.id}
+                      onClick={() =>
+                        handleProfileStatus(profile, isDisabled ? 'active' : 'disabled')
+                      }
+                      type="button"
+                      variant="ghost"
+                    >
+                      {workingId === profile.id
+                        ? 'Working...'
+                        : isDisabled
+                          ? 'Reactivate'
+                          : 'Disable'}
                     </Button>
                   </div>
                 </article>
               )
             })}
           </div>
+          <p className="admin-page__safe-delete-note">
+            Permanent deletion runs through the secure delete-user Edge Function.
+            The service role key is never exposed in the frontend.
+          </p>
         </section>
       )}
 
@@ -1114,6 +1467,42 @@ function AdminPage() {
       <AdminMemoryModal
         memory={selectedMemory}
         onClose={() => setSelectedMemory(null)}
+      />
+      <AdminUserModal
+        artists={dashboard.artists}
+        draft={selectedProfile ? getProfileDraft(selectedProfile) : {}}
+        isSelf={Boolean(selectedProfile && user?.id === selectedProfile.user_id)}
+        onClose={() => setSelectedProfile(null)}
+        onDraftChange={handleProfileDraftChange}
+        onRequestDelete={handleOpenDeleteUser}
+        onSave={handleSaveProfile}
+        profile={selectedProfile}
+        stats={
+          selectedProfile
+            ? userStatsById.get(selectedProfile.user_id) || {
+                cardsUnlocked: 0,
+                totalMemories: 0,
+                totalStars: 0,
+              }
+            : {
+                cardsUnlocked: 0,
+                totalMemories: 0,
+                totalStars: 0,
+              }
+        }
+        workingId={workingId}
+      />
+      <DeleteUserConfirmModal
+        deleting={deletingUserId === deleteCandidate?.id}
+        error={deleteError}
+        onClose={() => {
+          if (!deletingUserId) {
+            setDeleteCandidate(null)
+            setDeleteError('')
+          }
+        }}
+        onConfirm={handlePermanentDeleteUser}
+        profile={deleteCandidate}
       />
     </div>
   )

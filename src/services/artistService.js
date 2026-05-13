@@ -78,16 +78,43 @@ export const getSupportedArtists = async (userId) => {
     .map(normalizeArtist)
 }
 
-export const becomeFan = async ({ artistId, userId }) => {
+const insertFanLink = async ({ artistId, isFirstArchiver = false, userId }) => {
   const client = requireSupabase()
-  const { data, error } = await client
+  const payload = {
+    artist_id: artistId,
+    user_id: userId,
+  }
+
+  if (isFirstArchiver) {
+    payload.is_first_archiver = true
+  }
+
+  let response = await client
     .from('artist_fans')
-    .insert({
-      artist_id: artistId,
-      user_id: userId,
-    })
+    .insert(payload)
     .select()
     .single()
+
+  if (response.error && response.error.code === '42703') {
+    const fallbackPayload = { ...payload }
+    delete fallbackPayload.is_first_archiver
+    response = await client
+      .from('artist_fans')
+      .insert(fallbackPayload)
+      .select()
+      .single()
+  }
+
+  return response
+}
+
+export const becomeFan = async ({ artistId, isFirstArchiver = false, userId }) => {
+  const client = requireSupabase()
+  const { data, error } = await insertFanLink({
+    artistId,
+    isFirstArchiver,
+    userId,
+  })
 
   if (error) {
     if (error.code === '23505') {
@@ -149,7 +176,12 @@ export const createArtist = async ({ artist, userId }) => {
     throw error
   }
 
-  await becomeFan({ artistId: data.id, userId })
+  await becomeFan({ artistId: data.id, isFirstArchiver: true, userId })
 
-  return normalizeArtist(data)
+  const normalizedArtist = normalizeArtist(data)
+  return {
+    ...normalizedArtist,
+    fanCount: Math.max(normalizedArtist.fanCount || 0, 1),
+    isFirstFanArchiver: true,
+  }
 }

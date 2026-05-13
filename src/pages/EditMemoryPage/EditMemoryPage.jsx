@@ -150,7 +150,7 @@ function EditMemoryPage() {
   const hasProof = Boolean(proofFile || formData.proofImageUrl)
 
   return (
-    <div className="page-shell edit-memory-page">
+    <div className="page-shell form-container edit-memory-page">
       <section className="section-heading">
         <p className="section-kicker">Edit Memory</p>
         <h1>Refine an archived moment</h1>

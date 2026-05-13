@@ -20,7 +20,7 @@ function ProtectedRoute() {
       <div className="page-shell">
         <EmptyState
           description="Please contact the site owner if you think this should be changed."
-          title="This FanVerse profile is currently disabled"
+          title="Your account has been disabled."
         />
       </div>
     )

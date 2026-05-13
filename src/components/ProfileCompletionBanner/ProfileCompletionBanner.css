@@ -1,0 +1,35 @@
+.profile-completion-banner {
+  align-items: center;
+  background: linear-gradient(135deg, rgba(255, 253, 249, 0.94), rgba(246, 237, 255, 0.92));
+  border: 1px solid var(--color-border-bright);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-soft);
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-bottom: var(--space-5);
+  padding: var(--space-5);
+}
+
+.profile-completion-banner h2,
+.profile-completion-banner p {
+  margin: 0;
+}
+
+.profile-completion-banner h2 {
+  color: var(--color-white);
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+}
+
+.profile-completion-banner p:not(.section-kicker) {
+  color: var(--color-muted);
+  margin-top: var(--space-2);
+}
+
+@media (max-width: 680px) {
+  .profile-completion-banner {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+    padding: var(--space-4);
+  }
+}

@@ -12,6 +12,25 @@ const getDefaultDisplayName = (user) =>
   user?.email?.split('@')[0] ||
   'Fan Explorer'
 
+export const getMainFandomName = (profile) =>
+  profile?.favorite_fandom_artist || profile?.favorite_artist || ''
+
+export const isFanProfileComplete = (profile) =>
+  Boolean(
+    profile?.profile_completed &&
+      profile?.display_name?.trim() &&
+      profile?.main_artist_id,
+  )
+
+export const shouldShowProfileCompletion = (profile) =>
+  !profile ||
+  !profile.profile_completed ||
+  !profile.display_name?.trim() ||
+  !profile.main_artist_id
+
+export const getProfileCompletedValue = (profile) =>
+  Boolean(profile?.display_name?.trim() && profile?.main_artist_id)
+
 export const getProfile = async (userId) => {
   const client = requireSupabase()
   const { data, error } = await client
@@ -62,6 +81,9 @@ export const ensureProfile = async (user) => {
     display_name: getDefaultDisplayName(user),
     bio: '',
     favorite_artist: '',
+    favorite_fandom_artist: '',
+    main_artist_id: null,
+    profile_completed: false,
     avatar_url: user.user_metadata?.avatar_url || '',
     status: 'active',
   })

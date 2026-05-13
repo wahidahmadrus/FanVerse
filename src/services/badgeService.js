@@ -91,6 +91,24 @@ const buildBadgeRows = (badges, unlockedIds) =>
     unlocked: unlockedIds.has(badge.id),
   }))
 
+const upsertUserBadges = async ({ client, userId, badges }) => {
+  if (badges.length === 0) {
+    return
+  }
+
+  const { error } = await client.from('user_badges').upsert(
+    badges.map((badge) => ({
+      user_id: userId,
+      badge_id: badge.id,
+    })),
+    { onConflict: 'user_id,badge_id' },
+  )
+
+  if (error) {
+    throw error
+  }
+}
+
 export const syncUserBadges = async ({ userId, memories, supportedArtists = [] }) => {
   const client = requireSupabase()
   const badges = await getBadges()
@@ -98,19 +116,7 @@ export const syncUserBadges = async ({ userId, memories, supportedArtists = [] }
     meetsCondition(badge, memories, supportedArtists),
   )
 
-  if (unlockedBadges.length > 0) {
-    const { error } = await client.from('user_badges').upsert(
-      unlockedBadges.map((badge) => ({
-        user_id: userId,
-        badge_id: badge.id,
-      })),
-      { onConflict: 'user_id,badge_id' },
-    )
-
-    if (error) {
-      throw error
-    }
-  }
+  await upsertUserBadges({ client, userId, badges: unlockedBadges })
 
   const { data: userBadges, error } = await client
     .from('user_badges')
@@ -150,18 +156,7 @@ export const syncUserBadgesWithNew = async ({
   )
   const newBadges = eligibleBadges.filter((badge) => !existingIds.has(badge.id))
 
-  if (newBadges.length > 0) {
-    const { error } = await client.from('user_badges').insert(
-      newBadges.map((badge) => ({
-        user_id: userId,
-        badge_id: badge.id,
-      })),
-    )
-
-    if (error) {
-      throw error
-    }
-  }
+  await upsertUserBadges({ client, userId, badges: newBadges })
 
   const unlockedIds = new Set([
     ...existingIds,

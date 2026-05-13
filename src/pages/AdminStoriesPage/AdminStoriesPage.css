@@ -84,6 +84,17 @@
   width: auto;
 }
 
+.admin-stories-page__field-note {
+  color: var(--color-muted);
+  display: grid;
+  gap: var(--space-2);
+  line-height: 1.4;
+}
+
+.admin-stories-page__field-note .button {
+  justify-self: start;
+}
+
 .admin-stories-page__list,
 .admin-stories-page__items {
   display: grid;
@@ -94,7 +105,7 @@
 .admin-stories-page__filters {
   display: grid;
   gap: var(--space-3);
-  grid-template-columns: minmax(0, 1fr) minmax(9rem, 0.3fr) minmax(11rem, 0.35fr);
+  grid-template-columns: minmax(0, 1fr) minmax(11rem, 0.35fr);
   padding: var(--space-3);
 }
 
