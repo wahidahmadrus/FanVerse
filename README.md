@@ -1,6 +1,6 @@
-# FanVerse Archive
+# Fan Archive
 
-FanVerse Archive is a public React + Vite MVP for a fandom memory platform. Fans can sign up, create profiles, discover artists, create artist archives, save public or private memories, upload proof images, unlock badges and collectible cards, and share rewards.
+Fan Archive is a public React + Vite MVP for a fandom memory platform. Fans can sign up, create profiles, discover artists, create artist archives, save public or private memories, upload proof images, unlock badges and collectible cards, and share rewards.
 
 ## Tech Stack
 

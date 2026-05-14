@@ -15,7 +15,7 @@ const cardBackUrl = '/images/card-back.png'
 function CollectibleCard({
   card,
   character: providedCharacter,
-  username = 'A FanVerse fan',
+  username = 'A Fan Archive fan',
   userStats = {},
 }) {
   const isUnlocked = Boolean(card.unlocked)
@@ -114,7 +114,7 @@ function CollectibleCard({
               fileName={`${card.title}.png`}
               imageUrl={shareImageUrl}
               mode="image"
-              text={`${username} unlocked '${card.title}' on FanVerse Archive.`}
+              text={`${username} unlocked '${card.title}' on Fan Archive.`}
               title={card.title}
             >
               Share Card

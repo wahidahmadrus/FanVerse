@@ -1,6 +1,6 @@
 # delete-user Edge Function
 
-This function permanently deletes a FanVerse user and their related app data.
+This function permanently deletes a Fan Archive user and their related app data.
 It must be deployed to Supabase before the Admin Users danger-zone button can
 reach it.
 

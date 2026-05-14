@@ -18,7 +18,7 @@ function WhyItMattersSection() {
           screenshots.
         </p>
         <p>
-          FanVerse Archive turns that support into a personal collection you can
+          Fan Archive turns that support into a personal collection you can
           revisit with warmth, not pressure.
         </p>
       </div>

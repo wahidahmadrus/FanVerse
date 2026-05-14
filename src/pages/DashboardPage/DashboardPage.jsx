@@ -154,7 +154,7 @@ function DashboardPage() {
               {mainArtist?.image_url ? (
                 <img src={mainArtist.image_url} alt="" />
               ) : (
-                <span>{mainArtist?.name?.slice(0, 2).toUpperCase() || 'FV'}</span>
+                <span>{mainArtist?.name?.slice(0, 2).toUpperCase() || 'FA'}</span>
               )}
             </div>
             <div>

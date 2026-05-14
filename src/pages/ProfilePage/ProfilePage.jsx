@@ -254,7 +254,7 @@ function ProfilePage() {
             {avatarPreview || formData.avatar_url ? (
               <img src={avatarPreview || formData.avatar_url} alt="" />
             ) : (
-              <span>{formData.display_name.slice(0, 2).toUpperCase() || 'FV'}</span>
+              <span>{formData.display_name.slice(0, 2).toUpperCase() || 'FA'}</span>
             )}
           </div>
           <h2>{formData.display_name || 'Fan Explorer'}</h2>
@@ -319,7 +319,7 @@ function ProfilePage() {
             <textarea
               name="bio"
               onChange={handleChange}
-              placeholder="Tell the FanVerse a little about your support journey."
+              placeholder="Tell Fan Archive a little about your support journey."
               rows="5"
               value={formData.bio}
             ></textarea>

@@ -17,7 +17,7 @@ function ArtistCard({ artist }) {
           <span>{artist.category}</span>
         </div>
         <h3>{artist.name}</h3>
-        <p>{artist.description || 'A growing artist archive in the FanVerse.'}</p>
+        <p>{artist.description || 'A growing artist archive in Fan Archive.'}</p>
         <div className="artist-card__stats">
           <span>{artist.fanCount || 0} fans</span>
           <span>{artist.memoryCount || 0} memories</span>

@@ -95,7 +95,7 @@ function SignInPage() {
         </form>
 
         <p className="signin-page__footer">
-          New to FanVerse? <Link to="/signup">Create your archive</Link>
+          New to Fan Archive? <Link to="/signup">Create your archive</Link>
         </p>
       </section>
     </div>

@@ -166,7 +166,7 @@ function CreateArtistPage() {
           <textarea
             name="description"
             onChange={handleChange}
-            placeholder="Describe the artist and why this archive belongs in the FanVerse."
+            placeholder="Describe the artist and why this archive belongs in Fan Archive."
             rows="6"
             value={formData.description}
           ></textarea>

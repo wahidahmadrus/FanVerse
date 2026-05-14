@@ -51,7 +51,7 @@ function ArtistsPage() {
       <section className="artists-page__header">
         <div className="section-heading">
           <p className="section-kicker">Artists</p>
-          <h1>Artists in the FanVerse</h1>
+          <h1>Artists in Fan Archive</h1>
           <p>
             Browse artists fans are archiving, then join the communities that
             feel meaningful to you.

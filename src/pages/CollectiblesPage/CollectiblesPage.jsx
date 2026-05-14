@@ -512,8 +512,8 @@ function CollectiblesPage() {
             <strong>{unlockedCount}</strong>
             <span>Total cards unlocked</span>
             <ShareButton
-              text={`${profile?.display_name || 'A FanVerse fan'} completed their FanVerse Archive card collection.`}
-              title="FanVerse Archive Complete"
+              text={`${profile?.display_name || 'A Fan Archive fan'} completed their Fan Archive card collection.`}
+              title="Fan Archive Complete"
               variant="bright"
             >
               Share Collection
@@ -625,7 +625,7 @@ function CollectiblesPage() {
                     character={charactersById.get(card.character_id)}
                     key={card.id}
                     userStats={safeUserStats}
-                    username={profile?.display_name || 'A FanVerse fan'}
+                    username={profile?.display_name || 'A Fan Archive fan'}
                   />
                 ))}
               </div>
@@ -645,7 +645,7 @@ function CollectiblesPage() {
                     character={charactersById.get(card.character_id)}
                     key={card.id}
                     userStats={safeUserStats}
-                    username={profile?.display_name || 'A FanVerse fan'}
+                    username={profile?.display_name || 'A Fan Archive fan'}
                   />
                 ))}
               </div>

@@ -845,7 +845,7 @@ function AdminPage() {
 
     await runAdminAction({
       id: artist.id,
-      successMessage: `${artist.name} was removed from FanVerse.`,
+      successMessage: `${artist.name} was removed from Fan Archive.`,
       action: async () => {
         await deleteArtistAdmin(artist.id)
         setDashboard((currentDashboard) => ({
@@ -1009,7 +1009,7 @@ function AdminPage() {
       <section className="admin-page__header">
         <div className="section-heading">
           <p className="section-kicker">Admin</p>
-          <h1>FanVerse Control Center</h1>
+          <h1>Fan Archive Control Center</h1>
           <p>
             Manage users, artists, characters, memories, badges, and moderation
             from one protected admin space.

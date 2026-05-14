@@ -49,7 +49,7 @@ function SignUpPage() {
       } else {
         navigate('/signin', {
           replace: true,
-          state: { message: 'Check your email to confirm your FanVerse account.' },
+          state: { message: 'Check your email to confirm your Fan Archive account.' },
         })
       }
     } catch (submitError) {

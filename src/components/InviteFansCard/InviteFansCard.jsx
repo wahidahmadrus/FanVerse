@@ -2,7 +2,7 @@ import ShareButton from '../ShareButton/ShareButton.jsx'
 import './InviteFansCard.css'
 
 function InviteFansCard({ artistName }) {
-  const inviteText = `I'm building a fan archive for ${artistName} on FanVerse Archive. Join and add your memories.`
+  const inviteText = `I'm building a fan archive for ${artistName} on Fan Archive. Join and add your memories.`
 
   return (
     <section className="invite-fans-card">
@@ -14,7 +14,7 @@ function InviteFansCard({ artistName }) {
       <ShareButton
         mode="invite"
         text={inviteText}
-        title={`FanVerse Archive: ${artistName}`}
+        title={`Fan Archive: ${artistName}`}
         url={window.location.origin}
         variant="bright"
       >

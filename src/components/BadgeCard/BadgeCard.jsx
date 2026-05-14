@@ -19,7 +19,7 @@ function BadgeCard({ badge, compact = false }) {
         <p>{badge.description}</p>
         {badge.unlocked && !compact && (
           <ShareButton
-            text={`I just unlocked '${badge.title}' on FanVerse Archive. My fan journey keeps growing.`}
+            text={`I just unlocked '${badge.title}' on Fan Archive. My fan journey keeps growing.`}
             title={badge.title}
           >
             Share Badge

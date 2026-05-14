@@ -132,7 +132,7 @@ function ExplorePage() {
             <p className="section-kicker">Fandom</p>
             <h1>Choose your fandom first</h1>
             <p>
-              FanVerse Archive focuses on one Main Fandom / Artist for each fan
+              Fan Archive focuses on one Main Fandom / Artist for each fan
               profile.
             </p>
           </div>
@@ -198,7 +198,7 @@ function ExplorePage() {
               {artist?.image_url ? (
                 <img src={artist.image_url} alt="" />
               ) : (
-                <span>{artist?.name?.slice(0, 2).toUpperCase() || 'FV'}</span>
+                <span>{artist?.name?.slice(0, 2).toUpperCase() || 'FA'}</span>
               )}
             </div>
             <div>

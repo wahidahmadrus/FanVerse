@@ -14,7 +14,7 @@ function HowItWorksSection() {
         <p className="section-kicker">How It Works</p>
         <h2>Turn moments into a lasting archive</h2>
         <p>
-          FanVerse Archive keeps the experience gentle: save what matters, look
+          Fan Archive keeps the experience gentle: save what matters, look
           back with pride, and let your universe grow naturally.
         </p>
       </div>

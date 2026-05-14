@@ -334,4 +334,4 @@ export const getCharacterFragments = ({
 }
 
 export const createCharacterShareText = (character) =>
-  `I unlocked ${character.name} - ${character.fullTitle} from Archive Zero on FanVerse Archive.`
+  `I unlocked ${character.name} - ${character.fullTitle} from Archive Zero on Fan Archive.`

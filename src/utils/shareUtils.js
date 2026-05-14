@@ -58,11 +58,11 @@ export const shareText = async ({ text, title, url }) => {
   return copyStatus === 'copied' ? 'copied' : 'unsupported'
 }
 
-const getSafeFileName = (fileName = 'fanverse-card.png') =>
+const getSafeFileName = (fileName = 'fan-archive-card.png') =>
   fileName
     .trim()
     .replace(/[^a-z0-9._-]+/gi, '-')
-    .replace(/^-+|-+$/g, '') || 'fanverse-card.png'
+    .replace(/^-+|-+$/g, '') || 'fan-archive-card.png'
 
 export const shareImage = async ({ fileName, imageUrl, text, title }) => {
   const fallbackText = [text, imageUrl].filter(Boolean).join(' ')

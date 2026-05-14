@@ -10,7 +10,7 @@ function HeroSection({ memories }) {
   return (
     <section className="hero-section">
       <div className="hero-section__content">
-        <p className="section-kicker">FanVerse Archive</p>
+        <p className="section-kicker">Fan Archive</p>
         <h1>Archive Your Fan Journey</h1>
         <p>
           Save your memories, celebrate your support, and build your own

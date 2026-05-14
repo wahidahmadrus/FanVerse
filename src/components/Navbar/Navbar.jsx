@@ -26,7 +26,7 @@ function Navbar() {
       .map((part) => part[0])
       .join('')
       .slice(0, 2)
-      .toUpperCase() || 'FV'
+      .toUpperCase() || 'FA'
 
   const handleSignOut = async () => {
     await signOut()
@@ -34,10 +34,10 @@ function Navbar() {
 
   return (
     <header className="navbar">
-      <NavLink aria-label="FanVerse Archive home" className="navbar__brand" to="/">
-        <img src="/logo.jpeg" className="navbar__mark" alt="FanVerse logo" />
+      <NavLink aria-label="Fan Archive home" className="navbar__brand" to="/">
+        <img src="/logo.jpeg" className="navbar__mark" alt="Fan Archive logo" />
         <span>
-          <strong>FanVerse</strong>
+          <strong>Fan</strong>
           <span>Archive</span>
         </span>
       </NavLink>
