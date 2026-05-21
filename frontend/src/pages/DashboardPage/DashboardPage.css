@@ -1,0 +1,221 @@
+.dashboard-page__hero {
+  align-items: end;
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: 1fr auto;
+  margin-bottom: var(--space-5);
+}
+
+.dashboard-page__hero h1 {
+  color: var(--color-white);
+  font-size: clamp(2.1rem, 5vw, 4.2rem);
+  line-height: 1.04;
+  margin: 0;
+  max-width: 780px;
+}
+
+.dashboard-page__hero p:not(.section-kicker) {
+  color: var(--color-muted);
+  margin: var(--space-3) 0 0;
+  max-width: 620px;
+}
+
+.dashboard-page__stats {
+  margin-bottom: var(--space-6);
+}
+
+.dashboard-page__fandom-card {
+  align-items: center;
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  margin-bottom: var(--space-5);
+  padding: var(--space-5);
+}
+
+.dashboard-page__fandom-avatar {
+  align-items: center;
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, #f8d7ef, #dcefff);
+  border: 2px solid rgba(255, 255, 255, 0.78);
+  border-radius: 50%;
+  color: var(--color-purple);
+  display: flex;
+  font-weight: 900;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.dashboard-page__fandom-avatar img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.dashboard-page__fandom-card h2,
+.dashboard-page__fandom-card p {
+  margin: 0;
+}
+
+.dashboard-page__fandom-card h2 {
+  color: var(--color-white);
+  font-size: clamp(1.45rem, 3vw, 2rem);
+}
+
+.dashboard-page__fandom-card p:not(.section-kicker) {
+  color: var(--color-muted);
+  margin-top: var(--space-2);
+}
+
+.dashboard-page__fandom-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.dashboard-page__fandom-meta span {
+  background: #f6edff;
+  border: 1px solid rgba(141, 101, 216, 0.14);
+  border-radius: var(--radius-pill);
+  color: var(--color-purple);
+  font-size: 0.8rem;
+  font-weight: 900;
+  padding: 0.34rem 0.62rem;
+}
+
+.dashboard-page__content {
+  align-items: start;
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: minmax(0, 1.35fr) minmax(16rem, 0.65fr);
+}
+
+.dashboard-page__section-title {
+  align-items: end;
+  display: flex;
+  gap: var(--space-3);
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.dashboard-page__section-title h2 {
+  color: var(--color-white);
+  font-size: clamp(1.35rem, 3vw, 1.9rem);
+  margin: 0;
+}
+
+.dashboard-page__section-title--spaced {
+  margin-top: var(--space-6);
+}
+
+.dashboard-page__memory-list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.dashboard-page__side {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.dashboard-page__reward {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  position: relative;
+}
+
+.dashboard-page__quiet {
+  padding: var(--space-5);
+}
+
+.dashboard-page__quiet h2,
+.dashboard-page__quiet p {
+  margin: 0;
+}
+
+.dashboard-page__quiet h2 {
+  color: var(--color-white);
+  font-size: 1.15rem;
+}
+
+.dashboard-page__quiet p {
+  color: var(--color-muted);
+  margin-top: var(--space-2);
+}
+
+.dashboard-page__reward::after {
+  background: linear-gradient(135deg, #f8d7ef, #dcefff);
+  border-radius: var(--radius-sm);
+  content: '';
+  height: 3rem;
+  opacity: 0.75;
+  position: absolute;
+  right: var(--space-4);
+  top: -0.8rem;
+  transform: rotate(8deg);
+  width: 2rem;
+}
+
+.dashboard-page__reward h2 {
+  color: var(--color-white);
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.dashboard-page__reward p:not(.section-kicker) {
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.dashboard-page__quick-links {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.dashboard-page__quick-links .button {
+  min-height: 2.65rem;
+  padding: 0.68rem 0.85rem;
+}
+
+@media (max-width: 900px) {
+  .dashboard-page__hero,
+  .dashboard-page__content,
+  .dashboard-page__fandom-card {
+    align-items: start;
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-page__fandom-avatar {
+    width: 5rem;
+  }
+}
+
+@media (max-width: 680px) {
+  .dashboard-page__hero h1 {
+    font-size: clamp(1.85rem, 9vw, 2.3rem);
+  }
+
+  .dashboard-page__stats {
+    gap: var(--space-3);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-bottom: var(--space-5);
+  }
+
+  .dashboard-page__section-title {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .dashboard-page__quick-links {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .dashboard-page__quick-links .button {
+    font-size: 0.82rem;
+    min-height: 2.35rem;
+    padding: 0.55rem 0.45rem;
+    white-space: normal;
+  }
+}

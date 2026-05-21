@@ -12,7 +12,7 @@ node_modules
 dist
 dist-ssr
 *.local
-supabase/.temp/
+backend/supabase/.temp/
 
 # Editor directories and files
 .vscode/*

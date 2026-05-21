@@ -10,30 +10,38 @@ Fan Archive is a public React + Vite MVP for a fandom memory platform. Fans can 
 - Supabase Storage
 - Plain CSS
 
+## Project Structure
+
+- `frontend/` contains the React + Vite app.
+- `backend/` contains the Supabase schema, migrations, and edge functions.
+
 ## Setup
 
-1. Install dependencies:
+1. Install frontend dependencies:
 
 ```bash
+cd frontend
 npm install
 ```
 
-2. Create a Supabase project and run the SQL in `supabase/schema.sql` from the Supabase SQL editor. The schema creates the tables, RLS policies, collectible card seeds, and Storage buckets.
+2. Create a Supabase project and run the SQL in `backend/supabase/schema.sql` from the Supabase SQL editor. The schema creates the tables, RLS policies, collectible card seeds, and Storage buckets.
 
-3. Copy `.env.example` to `.env` and add your project values:
+3. Copy `frontend/.env.example` to `frontend/.env` and add your project values:
 
 ```bash
 VITE_SUPABASE_URL=https://your-project-ref.supabase.co
 VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
-4. Start the app:
+4. Start the app from `frontend/`:
 
 ```bash
 npm run dev
 ```
 
 ## Scripts
+
+Run these from `frontend/`:
 
 - `npm run dev` starts the local development server.
 - `npm run build` creates a production build.

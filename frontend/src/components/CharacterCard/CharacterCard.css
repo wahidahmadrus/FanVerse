@@ -1,0 +1,264 @@
+.character-card {
+  background: rgba(255, 253, 249, 0.9);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-soft);
+  display: grid;
+  min-width: 0;
+  overflow: visible;
+}
+
+.character-card--selected,
+.character-card--unlocked {
+  border-color: var(--color-border-bright);
+}
+
+.character-card__portrait {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  margin: 0 auto;
+  max-width: 20rem;
+  overflow: visible;
+  position: relative;
+  width: 100%;
+}
+
+.character-card__portrait--placeholder {
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+}
+
+.character-card__portrait--back {
+  aspect-ratio: 3 / 4;
+  background:
+    radial-gradient(circle at 24% 18%, rgba(242, 138, 191, 0.25), transparent 24%),
+    linear-gradient(145deg, rgba(42, 22, 71, 0.9), rgba(141, 101, 216, 0.5));
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.character-card__portrait--placeholder::before,
+.character-card__portrait--placeholder::after {
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  border-radius: 50%;
+  content: '';
+  position: absolute;
+}
+
+.character-card__portrait--placeholder::before {
+  height: 68%;
+  width: 68%;
+}
+
+.character-card__portrait--placeholder::after {
+  height: 44%;
+  transform: rotate(-24deg);
+  width: 92%;
+}
+
+.character-card__portrait img {
+  border-radius: var(--radius-lg);
+  display: block;
+  height: auto;
+  object-fit: contain;
+  width: 100%;
+}
+
+.character-card__portrait--back img {
+  height: 100%;
+  object-fit: cover;
+}
+
+.character-card__portrait span {
+  align-items: center;
+  background: rgba(255, 253, 249, 0.82);
+  border: 1px solid var(--color-border-bright);
+  border-radius: 50%;
+  color: var(--color-white);
+  display: inline-flex;
+  font-size: 1.55rem;
+  font-weight: 900;
+  height: 5rem;
+  justify-content: center;
+  position: relative;
+  width: 5rem;
+  z-index: 1;
+}
+
+.character-card__portrait--back span {
+  border-radius: var(--radius-pill);
+  font-size: 1rem;
+  height: auto;
+  max-width: 10rem;
+  padding: 0.72rem 1rem;
+  text-align: center;
+  width: auto;
+}
+
+.character-card--en .character-card__portrait {
+  background:
+    radial-gradient(circle at 22% 22%, rgba(107, 187, 232, 0.28), transparent 22%),
+    linear-gradient(135deg, rgba(141, 101, 216, 0.34), rgba(107, 187, 232, 0.18));
+}
+
+.character-card--uan .character-card__portrait {
+  background:
+    radial-gradient(circle at 72% 24%, rgba(242, 138, 191, 0.3), transparent 24%),
+    linear-gradient(135deg, rgba(242, 138, 191, 0.3), rgba(141, 101, 216, 0.18));
+}
+
+.character-card--on .character-card__portrait {
+  background:
+    radial-gradient(circle at 28% 28%, rgba(217, 153, 53, 0.3), transparent 24%),
+    linear-gradient(135deg, rgba(217, 153, 53, 0.24), rgba(107, 187, 232, 0.22));
+}
+
+.character-card--yal .character-card__portrait {
+  background:
+    radial-gradient(circle at 78% 62%, rgba(242, 138, 191, 0.26), transparent 25%),
+    linear-gradient(135deg, rgba(141, 101, 216, 0.3), rgba(242, 138, 191, 0.2));
+}
+
+.character-card .character-card__portrait--back {
+  background:
+    radial-gradient(circle at 24% 18%, rgba(242, 138, 191, 0.25), transparent 24%),
+    linear-gradient(145deg, rgba(42, 22, 71, 0.9), rgba(141, 101, 216, 0.5));
+}
+
+.character-card .character-card__portrait--image {
+  background: transparent;
+  border: 0;
+}
+
+.character-card .character-card__portrait--loading {
+  aspect-ratio: 3 / 4;
+  background:
+    radial-gradient(circle at 28% 24%, rgba(242, 138, 191, 0.16), transparent 28%),
+    linear-gradient(135deg, rgba(248, 239, 255, 0.88), rgba(255, 248, 239, 0.92));
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.character-card__portrait--loading::before {
+  animation: character-card-loading 1.45s ease-in-out infinite;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.55),
+    transparent
+  );
+  content: '';
+  inset: 0;
+  position: absolute;
+  transform: translateX(-100%);
+}
+
+.character-card__body {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-4);
+}
+
+.character-card__topline,
+.character-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.character-card__topline span {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  padding: 0.24rem 0.55rem;
+}
+
+.character-card h3,
+.character-card strong,
+.character-card p,
+.character-card blockquote,
+.character-card small {
+  margin: 0;
+}
+
+.character-card h3 {
+  color: var(--color-white);
+  font-size: 1.42rem;
+  line-height: 1;
+}
+
+.character-card strong {
+  color: var(--color-purple);
+}
+
+.character-card p,
+.character-card small {
+  color: var(--color-muted);
+}
+
+.character-card blockquote {
+  border-left: 3px solid rgba(242, 138, 191, 0.45);
+  color: var(--color-white);
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.45;
+  padding-left: var(--space-3);
+}
+
+.character-card__actions {
+  align-items: center;
+  margin-top: var(--space-2);
+}
+
+.character-card__actions .button {
+  min-height: 2.45rem;
+  padding: 0.55rem 0.82rem;
+}
+
+.character-card__portrait img {
+  transition: opacity var(--transition-base);
+}
+
+.character-card__portrait--loading img {
+  opacity: 0;
+}
+
+.character-card--compact .character-card__portrait {
+  max-width: 20rem;
+}
+
+@keyframes character-card-loading {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.character-card--compact blockquote {
+  display: none;
+}
+
+@media (max-width: 680px) {
+  .character-card__body {
+    padding: var(--space-3);
+  }
+
+  .character-card h3 {
+    font-size: 1.22rem;
+  }
+
+  .character-card__actions {
+    flex-direction: column;
+  }
+
+  .character-card__actions .button,
+  .character-card__actions .share-button-wrap,
+  .character-card__actions .share-button {
+    width: 100%;
+  }
+}
