@@ -43,6 +43,13 @@
   margin: 0;
 }
 
+.fandom-artist-selector__helper {
+  color: var(--color-muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+  margin: calc(var(--space-2) * -1) 0 0;
+}
+
 .fandom-artist-selector__selected,
 .fandom-artist-selector__create {
   background: rgba(255, 253, 249, 0.72);

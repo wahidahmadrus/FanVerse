@@ -16,8 +16,10 @@ export const memorySelectWithProfileEmail = `
 export const normalizeMemory = (memory) => ({
   ...memory,
   title: memory.title,
+  description: memory.memory_text || memory.description || memory.content || memory.text || '',
+  memoryText: memory.memory_text || memory.description || memory.content || memory.text || '',
   artist: memory.artist,
-  artistName: memory.artist?.name || 'Unknown artist',
+  artistName: memory.artist?.name || 'Unknown fandom',
   type: memory.activity_type,
   date: memory.memory_date,
   baseStars: memory.base_stars || memory.stars || 0,
@@ -120,7 +122,7 @@ export const getUserMemoryById = async ({ memoryId, userId }) => {
 
 export const createMemory = async ({ memory, userId }) => {
   if (!memory.artistId) {
-    throw new Error('Choose or create your fandom before archiving a memory.')
+    throw new Error('Choose the artist or fandom this memory belongs to before archiving it.')
   }
 
   const client = requireSupabase()
@@ -157,7 +159,7 @@ export const createMemory = async ({ memory, userId }) => {
     ) {
       console.error('Memory insert failed because artist_id was invalid:', error)
       throw new Error(
-        'This memory could not be archived because the fandom was not found. Please choose or create your fandom again.',
+        'This memory could not be archived because the artist or fandom was not found. Please choose or create it again.',
       )
     }
 

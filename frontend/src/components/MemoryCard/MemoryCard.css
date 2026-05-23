@@ -156,14 +156,6 @@
   padding: var(--space-3);
 }
 
-.memory-card--compact .memory-card__description {
-  display: none;
-}
-
-.memory-card--compact .memory-card__topline span:last-child {
-  display: none;
-}
-
 @media (max-width: 640px) {
   .memory-card {
     grid-template-columns: 1fr;
@@ -179,14 +171,6 @@
   }
 
   .memory-card--compact .memory-card__media {
-    display: none;
-  }
-
-  .memory-card--compact .memory-card__topline span:nth-child(2),
-  .memory-card--compact .memory-card__topline span:nth-child(3),
-  .memory-card--compact .memory-card__meta span:nth-child(2),
-  .memory-card--compact .memory-card__meta span:last-child,
-  .memory-card--compact .memory-card__meta strong:nth-of-type(2) {
     display: none;
   }
 

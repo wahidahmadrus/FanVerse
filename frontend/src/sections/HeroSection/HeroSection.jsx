@@ -19,7 +19,7 @@ function HeroSection({ memories }) {
         <div className="actions hero-section__actions">
           <Button to="/signup">Start Your Archive</Button>
           <Button to="/explore" variant="secondary">
-            Choose Your Fandom
+            Fandom
           </Button>
         </div>
       </div>

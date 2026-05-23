@@ -161,11 +161,6 @@ function ProfilePage() {
       return
     }
 
-    if (!formData.main_artist_id) {
-      setError('Choose your fandom before saving your fan profile.')
-      return
-    }
-
     try {
       setSaving(true)
       const avatarUrl = avatarFile
@@ -182,7 +177,7 @@ function ProfilePage() {
       const nextProfile = {
         ...profile,
         display_name: formData.display_name.trim(),
-        main_artist_id: formData.main_artist_id,
+        main_artist_id: formData.main_artist_id || null,
       }
       const payload = {
         user_id: user.id,
@@ -191,7 +186,7 @@ function ProfilePage() {
         bio: formData.bio.trim(),
         favorite_artist: fandomName,
         favorite_fandom_artist: fandomName,
-        main_artist_id: formData.main_artist_id,
+        main_artist_id: formData.main_artist_id || null,
         profile_completed: getProfileCompletedValue(nextProfile),
         avatar_url: avatarUrl || null,
       }
@@ -209,6 +204,7 @@ function ProfilePage() {
         avatar_url: avatarUrl || '',
         favorite_artist: fandomName,
         favorite_fandom_artist: fandomName,
+        main_artist_id: formData.main_artist_id || '',
       }))
       setAvatarFile(null)
       setAvatarPreview('')
@@ -236,15 +232,15 @@ function ProfilePage() {
           <p className="section-kicker">Profile</p>
           <h1>Your fan identity</h1>
           <p>
-            Create a gentle profile around your Main Fandom / Artist and the
-            memories you want to preserve.
+            Create a gentle profile around your fan diary. A favorite fandom can
+            personalize the experience, but it does not limit your memories.
           </p>
         </div>
       </section>
 
       {shouldShowProfileCompletion(profile) && (
         <div className="profile-page__inline-helper" role="status">
-          Complete your fan profile by adding your name and choosing your fandom.
+          Complete your fan profile by adding your display name. Favorite fandom is optional.
         </div>
       )}
 
@@ -262,7 +258,7 @@ function ProfilePage() {
           <strong>
             {selectedArtist?.name ||
               formData.favorite_fandom_artist ||
-              'Main Fandom / Artist not set yet'}
+              'Favorite fandom not set yet'}
           </strong>
           <button
             className="profile-page__actions-toggle"
@@ -326,12 +322,13 @@ function ProfilePage() {
           </label>
 
           <FandomArtistSelector
-            className={
-              !formData.main_artist_id ? 'profile-page__field--missing' : ''
-            }
             defaultValue={formData.favorite_fandom_artist}
+            helperText="Optional: used as a profile detail and the default memory tag."
+            label="Favorite Fandom / Artist"
             onArtistSelected={handleFandomSelected}
+            placeholder="Search or create a favorite fandom"
             selectedArtist={selectedArtist}
+            selectedLabel="Your favorite fandom"
             userId={user.id}
           />
 

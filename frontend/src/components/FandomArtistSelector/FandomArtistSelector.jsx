@@ -9,9 +9,13 @@ function FandomArtistSelector({
   autoFocus = false,
   className = '',
   defaultValue = '',
+  helperText = '',
+  label = 'Artist / Fandom',
   onArtistSelected,
   onMessage,
+  placeholder = 'Search or create an artist/fandom',
   selectedArtist = null,
+  selectedLabel = 'Selected artist/fandom',
   userId,
 }) {
   const [query, setQuery] = useState(selectedArtist?.name || defaultValue)
@@ -103,7 +107,7 @@ function FandomArtistSelector({
 
   const handleSelectArtist = async (artist) => {
     if (!userId) {
-      setError('Sign in before choosing your fandom.')
+      setError('Sign in before choosing an artist or fandom.')
       return
     }
 
@@ -115,11 +119,11 @@ function FandomArtistSelector({
       setQuery(artist.name)
       setSuggestions([])
       await onArtistSelected?.(artist, {
-        message: 'You joined this fandom archive.',
+        message: 'Artist/Fandom selected for your fan archive.',
         status: 'joined',
       })
-      setSuccess('You joined this fandom archive.')
-      onMessage?.('You joined this fandom archive.')
+      setSuccess('Artist/Fandom selected for your fan archive.')
+      onMessage?.('Artist/Fandom selected for your fan archive.')
     } catch (selectError) {
       setError(selectError.message)
     } finally {
@@ -161,11 +165,11 @@ function FandomArtistSelector({
       setImageFile(null)
       setImagePreview('')
       await onArtistSelected?.(artist, {
-        message: 'You are the first fan archiver for this fandom.',
+        message: 'This artist/fandom is now available for fan memories.',
         status: 'created',
       })
-      setSuccess('You are the first fan archiver for this fandom.')
-      onMessage?.('You are the first fan archiver for this fandom.')
+      setSuccess('This artist/fandom is now available for fan memories.')
+      onMessage?.('This artist/fandom is now available for fan memories.')
     } catch (createError) {
       setError(createError.message)
     } finally {
@@ -176,7 +180,7 @@ function FandomArtistSelector({
   return (
     <div className={`fandom-artist-selector ${className}`.trim()}>
       <label>
-        <span>Main Fandom / Artist</span>
+        <span>{label}</span>
         <input
           autoFocus={autoFocus}
           onChange={(event) => {
@@ -188,18 +192,19 @@ function FandomArtistSelector({
               setLastSearchTerm('')
             }
           }}
-          placeholder="Choose your fandom"
+          placeholder={placeholder}
           type="search"
           value={query}
         />
       </label>
+      {helperText && <p className="fandom-artist-selector__helper">{helperText}</p>}
 
       <FormMessage type="error">{error}</FormMessage>
       <FormMessage type="success">{success}</FormMessage>
 
       {selectedArtist && (
         <div className="fandom-artist-selector__selected">
-          <span>Your fandom space</span>
+          <span>{selectedLabel}</span>
           <strong>{selectedArtist.name}</strong>
           <small>{selectedArtist.category}</small>
         </div>
@@ -235,7 +240,7 @@ function FandomArtistSelector({
 
       {canCreate && (
         <div className="fandom-artist-selector__create">
-          <p>This fandom is not in the archive yet.</p>
+          <p>This artist/fandom is not in the archive yet.</p>
           <div className="fandom-artist-selector__create-fields">
             <label>
               <span>Category optional</span>
@@ -250,7 +255,7 @@ function FandomArtistSelector({
               <span>Description optional</span>
               <textarea
                 onChange={(event) => setDescription(event.target.value)}
-                placeholder="A short note for this fandom space."
+                placeholder="A short note for this artist or fandom."
                 rows="3"
                 value={description}
               ></textarea>
@@ -272,7 +277,7 @@ function FandomArtistSelector({
             )}
           </div>
           <Button disabled={working} onClick={handleCreateArtist} type="button" variant="secondary">
-            {working ? 'Creating...' : 'Create this Fandom'}
+            {working ? 'Creating...' : 'Create Artist/Fandom'}
           </Button>
         </div>
       )}

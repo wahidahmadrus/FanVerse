@@ -92,7 +92,7 @@ function EditMemoryPage() {
     }
 
     if (!formData.artistId) {
-      setError('Choose the artist this memory belongs to.')
+      setError('Choose the artist or fandom this memory belongs to.')
       return
     }
 
@@ -155,7 +155,7 @@ function EditMemoryPage() {
         <p className="section-kicker">Edit Memory</p>
         <h1>Refine an archived moment</h1>
         <p>
-          Update the details, visibility, or artist connection while keeping the
+          Update the details, visibility, or artist/fandom tag while keeping the
           memory part of your journey.
         </p>
       </section>
@@ -176,14 +176,14 @@ function EditMemoryPage() {
         </label>
 
         <label>
-          <span>Artist</span>
+          <span>Artist / Fandom</span>
           <select
             name="artistId"
             onChange={handleChange}
             required
             value={formData.artistId}
           >
-            <option value="">Choose an artist</option>
+            <option value="">Choose an artist/fandom</option>
             {artists.map((artist) => (
               <option key={artist.id} value={artist.id}>
                 {artist.name}

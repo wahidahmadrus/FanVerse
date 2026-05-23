@@ -66,8 +66,8 @@ function SignUpPage() {
           <p className="section-kicker">Sign Up</p>
           <h1>Create your fan archive</h1>
           <p>
-            Choose one Main Fandom / Artist, then keep your memories in a place
-            built for them.
+            Start a fan diary for any artist, fandom, event, or moment you want
+            to preserve.
           </p>
         </div>
 

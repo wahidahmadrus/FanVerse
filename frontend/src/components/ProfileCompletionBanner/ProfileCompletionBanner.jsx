@@ -7,7 +7,7 @@ function ProfileCompletionBanner({ className = '' }) {
       <div>
         <p className="section-kicker">Profile Setup</p>
         <h2>Complete your fan profile</h2>
-        <p>Choose your fandom, add your name, and start building your archive.</p>
+        <p>Add your display name and an optional favorite fandom to personalize your archive.</p>
       </div>
       <Button to="/profile">Complete Profile</Button>
     </section>

@@ -26,7 +26,7 @@ export const signUp = async ({ name, email, password }) => {
       favorite_artist: '',
       favorite_fandom_artist: '',
       main_artist_id: null,
-      profile_completed: false,
+      profile_completed: Boolean(name.trim()),
       avatar_url: '',
     })
   }

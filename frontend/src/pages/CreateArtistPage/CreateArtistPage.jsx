@@ -116,7 +116,7 @@ function CreateArtistPage() {
       await refreshProfile(user.id)
 
       navigate(`/artists/${artist.id}`, {
-        state: { message: 'You are the first fan archiver for this fandom.' },
+        state: { message: 'This artist/fandom is now available for fan memories.' },
       })
     } catch (submitError) {
       setError(submitError.message)

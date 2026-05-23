@@ -259,12 +259,12 @@ function AdminUserModal({
             />
           </label>
           <label>
-            <span>Main artist</span>
+            <span>Favorite artist/fandom record</span>
             <select
               onChange={(event) => onDraftChange(profile, 'main_artist_id', event.target.value)}
               value={draft.main_artist_id}
             >
-              <option value="">No main fandom selected</option>
+              <option value="">No favorite fandom selected</option>
               {artists.map((artist) => (
                 <option key={artist.id} value={artist.id}>
                   {artist.name}
@@ -739,9 +739,7 @@ function AdminPage() {
             favorite_artist: fandomName,
             favorite_fandom_artist: fandomName,
             main_artist_id: draft.main_artist_id || null,
-            profile_completed: Boolean(
-              draft.display_name.trim() && draft.main_artist_id,
-            ),
+            profile_completed: Boolean(draft.display_name.trim()),
             role: draft.is_admin ? 'admin' : 'user',
             status: draft.status,
           },
@@ -1104,9 +1102,9 @@ function AdminPage() {
                       {mainArtist?.name ||
                         profile.favorite_fandom_artist ||
                         profile.favorite_artist ||
-                        'Main fandom not set'}
+                        'Favorite fandom not set'}
                     </span>
-                    <span>Main Fandom / Artist</span>
+                    <span>Favorite Fandom / Artist</span>
                   </div>
                   <div>
                     <span>{roleLabel}</span>

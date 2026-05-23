@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import AchievementToast from '../../components/AchievementToast/AchievementToast.jsx'
 import Button from '../../components/Button/Button.jsx'
-import EmptyState from '../../components/EmptyState/EmptyState.jsx'
 import FandomArtistSelector from '../../components/FandomArtistSelector/FandomArtistSelector.jsx'
 import FormMessage from '../../components/FormMessage/FormMessage.jsx'
 import LoadingState from '../../components/LoadingState/LoadingState.jsx'
@@ -62,7 +61,7 @@ function AddMemoryPage() {
   const { profile, user } = useAuth()
   const defaultArtistId = preselectedArtistId || profile?.main_artist_id || ''
   const [artists, setArtists] = useState([])
-  const [isChangingArtist, setIsChangingArtist] = useState(false)
+  const [isChangingArtist, setIsChangingArtist] = useState(!defaultArtistId)
   const [formData, setFormData] = useState(() =>
     createInitialFormState(defaultArtistId),
   )
@@ -73,8 +72,6 @@ function AddMemoryPage() {
   const [loadingArtists, setLoadingArtists] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-
-  const missingMainFandom = !profile?.main_artist_id
 
   useEffect(() => {
     const loadArtists = async () => {
@@ -153,14 +150,14 @@ function AddMemoryPage() {
     }
 
     if (isChangingArtist) {
-      setError('Choose or create your fandom before archiving a memory.')
+      setError('Choose the artist or fandom this memory belongs to before archiving it.')
       return
     }
 
     const artistId = formData.artistId || defaultArtistId
 
     if (!artistId) {
-      setError('Choose or create your fandom before archiving a memory.')
+      setError('Choose the artist or fandom this memory belongs to before archiving it.')
       return
     }
 
@@ -172,7 +169,7 @@ function AddMemoryPage() {
         artistForMemory = await getArtistById(artistId)
       } catch (artistError) {
         console.error('Unable to verify memory artist before insert:', artistError)
-        setError('This fandom could not be found. Please choose or create it again.')
+        setError('This artist or fandom could not be found. Please choose or create it again.')
         return
       }
 
@@ -217,7 +214,7 @@ function AddMemoryPage() {
         submitError?.message?.toLowerCase().includes('foreign key')
       ) {
         setError(
-          'This memory could not be archived because the fandom was not found. Please choose or create your fandom again.',
+          'This memory could not be archived because the artist or fandom was not found. Please choose or create it again.',
         )
       } else {
         setError(submitError.message)
@@ -229,19 +226,6 @@ function AddMemoryPage() {
 
   if (loadingArtists) {
     return <LoadingState label="Preparing your fan diary" />
-  }
-
-  if (missingMainFandom) {
-    return (
-      <div className="page-shell form-container add-memory-page">
-        <EmptyState
-          actionLabel="Complete Profile"
-          actionTo="/profile"
-          description="Your memory needs a fandom archive. Select or create your fandom before adding memories."
-          title="Choose your fandom first"
-        />
-      </div>
-    )
   }
 
   return (
@@ -321,29 +305,28 @@ function AddMemoryPage() {
           <div className="add-memory-page__artist-box">
             <div>
               <span>Artist / Fandom</span>
-              <strong>{selectedArtist?.name || 'Choose your fandom'}</strong>
+              <strong>{selectedArtist?.name || 'No artist/fandom selected'}</strong>
+              <small>Choose the artist or fandom this memory belongs to.</small>
             </div>
             <button
               onClick={() => {
-                if (!isChangingArtist) {
-                  setFormData((currentData) => ({
-                    ...currentData,
-                    artistId: '',
-                  }))
-                }
                 setIsChangingArtist((isChanging) => !isChanging)
               }}
               type="button"
             >
-              Change
+              {selectedArtist ? 'Change' : 'Choose'}
             </button>
           </div>
 
-          {isChangingArtist && (
+          {(isChangingArtist || !activeArtistId) && (
             <div className="add-memory-page__artist-search">
               <FandomArtistSelector
+                helperText="Choose the artist or fandom this memory belongs to."
+                label="Artist / Fandom"
                 onArtistSelected={handleFandomSelected}
+                placeholder="Search or create an artist/fandom"
                 selectedArtist={selectedArtist}
+                selectedLabel="Memory belongs to"
                 userId={user.id}
               />
             </div>
@@ -432,10 +415,10 @@ function AddMemoryPage() {
           ) : (
             <div className="add-memory-page__tip glass-panel">
               <p className="section-kicker">Your Fan Archive</p>
-              <h2>{selectedArtist?.name || 'Your fandom'} diary</h2>
+              <h2>{selectedArtist?.name || 'Any fandom'} diary</h2>
               <p>
-                Start with the feeling. Details can stay simple as long as the
-                memory is true to you.
+                Start with the feeling. Artist/Fandom is the memory tag, not a
+                limit on what you can preserve.
               </p>
             </div>
           )}

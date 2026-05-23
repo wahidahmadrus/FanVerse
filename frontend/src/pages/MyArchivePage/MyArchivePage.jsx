@@ -391,7 +391,7 @@ function MyArchivePage() {
           actionLabel="Write a Fan Memory"
           actionTo="/add-memory"
           description="Start with one concert, stream, fan event, artwork, or personal moment."
-          title="Your archive is ready for its first memory"
+          title="Your fan diary is waiting for its first memory."
         />
       )}
 

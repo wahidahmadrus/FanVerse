@@ -16,20 +16,13 @@ export const getMainFandomName = (profile) =>
   profile?.favorite_fandom_artist || profile?.favorite_artist || ''
 
 export const isFanProfileComplete = (profile) =>
-  Boolean(
-    profile?.profile_completed &&
-      profile?.display_name?.trim() &&
-      profile?.main_artist_id,
-  )
+  Boolean(profile?.display_name?.trim())
 
 export const shouldShowProfileCompletion = (profile) =>
-  !profile ||
-  !profile.profile_completed ||
-  !profile.display_name?.trim() ||
-  !profile.main_artist_id
+  !profile || !profile.display_name?.trim()
 
 export const getProfileCompletedValue = (profile) =>
-  Boolean(profile?.display_name?.trim() && profile?.main_artist_id)
+  Boolean(profile?.display_name?.trim())
 
 export const getProfile = async (userId) => {
   const client = requireSupabase()

@@ -105,6 +105,13 @@
   margin-top: 0.15rem;
 }
 
+.add-memory-page__artist-box small {
+  color: var(--color-muted);
+  display: block;
+  font-weight: 700;
+  margin-top: 0.2rem;
+}
+
 .add-memory-page__artist-box button {
   background: #f6edff;
   border: 1px solid rgba(141, 101, 216, 0.16);
